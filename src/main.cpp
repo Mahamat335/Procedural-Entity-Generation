@@ -18,12 +18,13 @@
 #include <EBO.h>
 #include <Texture.h>
 #include <game.h>
+#include <ShapeManager.h>
+#include <ShapeType.h>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
-void RenderEntities(Entity root, unsigned int modelLoc);
 void ChangePolygonMode();
 
 const unsigned int width = 800;
@@ -77,94 +78,33 @@ int main()
 
 	// vsynch
 	// glfwSwapInterval(0);
+	ShapeManager::Instance()->print();
 
-	float vertices[] = {
-		// Back face
-		-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f,
-		0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f,
-		0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f,
-		-0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f,
+	float *vertices = const_cast<float *>(ShapeManager::Instance()->GetVertices(SPHERE));
 
-		// Front face
-		0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-		0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-		-0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+	unsigned int *indices = const_cast<unsigned int *>(ShapeManager::Instance()->GetIndices(SPHERE));
 
-		// Left face
-		-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f,
-		-0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f,
-		-0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f,
-		-0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f,
-
-		// Right face
-		0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-
-		// Bottom face
-		0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, -1.0f, 0.0f,
-		0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, -1.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, -1.0f, 0.0f,
-		-0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, -1.0f, 0.0f,
-
-		// Top face
-		-0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-		0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-		0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-		-0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f};
-
-	unsigned int indices[] = {
-		// Back face
-		0, 1, 2,
-		2, 3, 0,
-
-		// Front face
-		4, 5, 6,
-		6, 7, 4,
-
-		// Left face
-		8, 9, 10,
-		10, 11, 8,
-
-		// Right face
-		12, 13, 14,
-		14, 15, 12,
-
-		// Bottom face
-		16, 17, 18,
-		18, 19, 16,
-
-		// Top face
-		20, 21, 22,
-		22, 23, 20};
+	std::cout << "Vertices: " << vertices << std::endl;
 
 	game.Start();
 
 	// Textures
 
 	Shader shaderProgram("resources/shaders/default.vert", "resources/shaders/default.frag");
-	Texture tex1("resources/textures/container.jpg", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGB, GL_UNSIGNED_BYTE);
-	Texture tex2("resources/textures/awesomeface.png", GL_TEXTURE_2D, GL_TEXTURE1, GL_RGBA, GL_UNSIGNED_BYTE);
 
 	// Vertex Objects
 	VAO VAO1;
 	VAO1.Bind();
-	VBO VBO1(vertices, sizeof(vertices));
-	EBO EBO1(indices, sizeof(indices));
-	VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 11 * sizeof(float), (void *)0);
-	VAO1.LinkAttrib(VBO1, 1, 2, GL_FLOAT, 11 * sizeof(float), (void *)(3 * sizeof(float)));
-	VAO1.LinkAttrib(VBO1, 2, 3, GL_FLOAT, 11 * sizeof(float), (void *)(5 * sizeof(float)));
-	VAO1.LinkAttrib(VBO1, 3, 3, GL_FLOAT, 11 * sizeof(float), (void *)(8 * sizeof(float)));
+	VBO VBO1(vertices, ShapeManager::SphereVerticesSize);
+	EBO EBO1(indices, ShapeManager::SphereIndicesSize);
+	VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 9 * sizeof(float), (void *)0);
+	VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 9 * sizeof(float), (void *)(3 * sizeof(float)));
+	VAO1.LinkAttrib(VBO1, 2, 3, GL_FLOAT, 9 * sizeof(float), (void *)(6 * sizeof(float)));
 	VAO1.Unbind();
 	VBO1.Unbind();
 	EBO1.Unbind();
 
 	shaderProgram.use();
-
-	tex1.texUnit(shaderProgram, "texture1", 0);
-	tex2.texUnit(shaderProgram, "texture2", 1);
 
 	// shadow
 	unsigned int depthMapFBO;
@@ -214,11 +154,6 @@ int main()
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glActiveTexture(GL_TEXTURE0);
-		tex1.Bind();
-		glActiveTexture(GL_TEXTURE1);
-		tex2.Bind();
-
 		shaderProgram.use();
 
 		glm::mat4 view = camera.GetViewMatrix();
@@ -261,33 +196,9 @@ int main()
 	VBO1.Delete();
 	EBO1.Delete();
 	shaderProgram.deleteProgram();
-	tex1.Delete();
-	tex2.Delete();
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;
-}
-
-void RenderEntities(Entity root, unsigned int modelLoc)
-{
-	std::stack<Entity *> stack;
-	for (auto &child : root.children)
-	{
-		if (child->isEnable)
-			stack.push(child);
-	}
-
-	while (!stack.empty())
-	{
-		Entity *current = stack.top();
-		stack.pop();
-		current->DrawMesh(modelLoc);
-		for (auto &child : current->children)
-		{
-			if (child->isEnable)
-				stack.push(child);
-		}
-	}
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly

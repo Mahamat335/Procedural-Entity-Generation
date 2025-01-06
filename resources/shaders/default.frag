@@ -1,15 +1,12 @@
 #version 330 core
 out vec4 FragColor;
 
-in vec2 TexCoord;
 in vec3 Normal;  
 in vec3 FragPos;  
 in vec3 Color;
 
 uniform vec3 lightPos;
 uniform vec3 lightColor;
-uniform sampler2D texture1;
-uniform sampler2D texture2;
 uniform vec3 viewPos;
 
 struct PointLight {    
@@ -64,7 +61,7 @@ void main()
         result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);
 
     FragColor.rgb = pow(FragColor.rgb, vec3(1 / gamma));
-    FragColor = vec4(result, 1.0f) * mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.2);
+    FragColor = vec4(result, 1.0f);
     FragColor.rgb = pow(FragColor.rgb, vec3(gamma));
     //FragColor = vec4((ambient + diffuse + specular) * vec3(0.5f, 0.5f, 0.0f), 1.0f);
 }

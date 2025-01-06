@@ -10,6 +10,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <ShapeType.h>
 
 class Entity
 {
@@ -22,10 +23,22 @@ public:
     Entity *parentPtr = nullptr;
     bool isEnable = true;
     bool isStatic = false;
+    ShapeType Shape;
+    static std::vector<Entity *> CubeEntities;
+    static std::vector<Entity *> SphereEntities;
 
-    Entity(Transform t = Transform()) : transform(t)
+    Entity(Transform t = Transform(), ShapeType shape = CUBE) : transform(t), Shape(shape)
     {
+        switch (shape)
+        {
+        case CUBE:
+            Entity::CubeEntities.push_back(this);
+            break;
+        case SPHERE:
+            Entity::SphereEntities.push_back(this);
+        }
     }
+
     ~Entity()
     {
         if (parent)
@@ -62,7 +75,7 @@ public:
     {
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform.modelMatrix));
         // glDrawArrays(GL_TRIANGLES, 0, 36);
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, 60, GL_UNSIGNED_INT, 0);
     }
     void Move(glm::vec3 newPosition)
     {
