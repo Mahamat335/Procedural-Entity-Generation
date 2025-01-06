@@ -74,8 +74,15 @@ public:
     void DrawMesh(unsigned int modelLoc)
     {
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform.modelMatrix));
-        // glDrawArrays(GL_TRIANGLES, 0, 36);
-        glDrawElements(GL_TRIANGLES, 60, GL_UNSIGNED_INT, 0);
+        if (Shape == CUBE)
+        {
+            // glDrawArrays(GL_TRIANGLES, 0, 36);
+            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        }
+        else
+        {
+            glDrawElements(GL_TRIANGLES, 60, GL_UNSIGNED_INT, 0);
+        }
     }
     void Move(glm::vec3 newPosition)
     {

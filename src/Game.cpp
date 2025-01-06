@@ -1,5 +1,6 @@
 #include <Game.h>
 #include <CubeCollider.h>
+#include <ShapeManager.h>
 
 Entity *floor1[10][10];
 Entity root, object, child, grandChild, o2, floor2, wall;
@@ -83,7 +84,18 @@ void Game::RenderEntities(Entity root, unsigned int modelLoc)
     {
         Entity *current = stack.top();
         stack.pop();
-        current->DrawMesh(modelLoc);
+        if (current->Shape == CUBE)
+        {
+            ShapeManager::Instance()->VAO_CUBE->Bind();
+            current->DrawMesh(modelLoc);
+            ShapeManager::Instance()->VAO_CUBE->Unbind();
+        }
+        else
+        {
+            ShapeManager::Instance()->VAO_SPHERE->Bind();
+            current->DrawMesh(modelLoc);
+            ShapeManager::Instance()->VAO_SPHERE->Unbind();
+        }
         for (auto &child : current->children)
         {
             if (child->isEnable)

@@ -4,21 +4,25 @@
 #include <Entity.h>
 #include <iterator>
 #include <ShapeType.h>
+#include <VAO.h>
 
 class ShapeManager
 {
 public:
-    static unsigned int ModelLoc;
     static const unsigned int CubeVerticesSize = 264 * sizeof(float);
     static const unsigned int CubeIndicesSize = 36 * sizeof(unsigned int);
     static const unsigned int SphereVerticesSize = 108 * sizeof(float);
     static const unsigned int SphereIndicesSize = 60 * sizeof(unsigned int);
+    VAO *VAO_CUBE;
+    VAO *VAO_SPHERE;
 
     static ShapeManager *Instance()
     {
         if (instance == nullptr)
         {
             instance = new ShapeManager();
+            instance->VAO_CUBE = new VAO();
+            instance->VAO_SPHERE = new VAO();
         }
         return instance;
     }
@@ -52,16 +56,20 @@ public:
         return nullptr;
     }
 
-    static void Draw(ShapeType shape)
+    static void Draw(unsigned int modelLoc)
     {
+        ShapeManager::Instance()->VAO_CUBE->Bind();
         for (auto &entity : Entity::CubeEntities)
         {
-            entity->DrawMesh(ModelLoc);
+            entity->DrawMesh(modelLoc);
         }
+        ShapeManager::Instance()->VAO_CUBE->Unbind();
+        ShapeManager::Instance()->VAO_SPHERE->Bind();
         for (auto &entity : Entity::SphereEntities)
         {
-            entity->DrawMesh(ModelLoc);
+            entity->DrawMesh(modelLoc);
         }
+        ShapeManager::Instance()->VAO_SPHERE->Unbind();
     }
 
 private:
@@ -129,30 +137,179 @@ private:
         22, 23, 20};
 
     const float _sphereVertices[108] = {
-    // Pozisyon            // Renk          // Normaller
-     0.000f,  1.000f,  0.000f,  1.0f, 1.0f, 1.0f,  0.000f,  1.000f,  0.000f,
-     0.894f,  0.447f,  0.000f,  1.0f, 0.0f, 0.0f,  0.894f,  0.447f,  0.000f,
-     0.276f,  0.447f,  0.851f,  0.0f, 1.0f, 0.0f,  0.276f,  0.447f,  0.851f,
-    -0.724f,  0.447f,  0.526f,  0.0f, 0.0f, 1.0f, -0.724f,  0.447f,  0.526f,
-    -0.724f,  0.447f, -0.526f,  1.0f, 1.0f, 0.0f, -0.724f,  0.447f, -0.526f,
-     0.276f,  0.447f, -0.851f,  1.0f, 0.0f, 1.0f,  0.276f,  0.447f, -0.851f,
-     0.724f, -0.447f,  0.526f,  0.0f, 1.0f, 1.0f,  0.724f, -0.447f,  0.526f,
-    -0.276f, -0.447f,  0.851f,  1.0f, 0.5f, 0.5f, -0.276f, -0.447f,  0.851f,
-    -0.894f, -0.447f,  0.000f,  0.5f, 1.0f, 0.5f, -0.894f, -0.447f,  0.000f,
-    -0.276f, -0.447f, -0.851f,  0.5f, 0.5f, 1.0f, -0.276f, -0.447f, -0.851f,
-     0.724f, -0.447f, -0.526f,  1.0f, 1.0f, 1.0f,  0.724f, -0.447f, -0.526f,
-     0.000f, -1.000f,  0.000f,  0.0f, 0.0f, 0.0f,  0.000f, -1.000f,  0.000f,
+        // Pozisyon            // Renk          // Normaller
+        0.000f,
+        1.000f,
+        0.000f,
+        1.0f,
+        1.0f,
+        1.0f,
+        0.000f,
+        1.000f,
+        0.000f,
+        0.894f,
+        0.447f,
+        0.000f,
+        1.0f,
+        0.0f,
+        0.0f,
+        0.894f,
+        0.447f,
+        0.000f,
+        0.276f,
+        0.447f,
+        0.851f,
+        0.0f,
+        1.0f,
+        0.0f,
+        0.276f,
+        0.447f,
+        0.851f,
+        -0.724f,
+        0.447f,
+        0.526f,
+        0.0f,
+        0.0f,
+        1.0f,
+        -0.724f,
+        0.447f,
+        0.526f,
+        -0.724f,
+        0.447f,
+        -0.526f,
+        1.0f,
+        1.0f,
+        0.0f,
+        -0.724f,
+        0.447f,
+        -0.526f,
+        0.276f,
+        0.447f,
+        -0.851f,
+        1.0f,
+        0.0f,
+        1.0f,
+        0.276f,
+        0.447f,
+        -0.851f,
+        0.724f,
+        -0.447f,
+        0.526f,
+        0.0f,
+        1.0f,
+        1.0f,
+        0.724f,
+        -0.447f,
+        0.526f,
+        -0.276f,
+        -0.447f,
+        0.851f,
+        1.0f,
+        0.5f,
+        0.5f,
+        -0.276f,
+        -0.447f,
+        0.851f,
+        -0.894f,
+        -0.447f,
+        0.000f,
+        0.5f,
+        1.0f,
+        0.5f,
+        -0.894f,
+        -0.447f,
+        0.000f,
+        -0.276f,
+        -0.447f,
+        -0.851f,
+        0.5f,
+        0.5f,
+        1.0f,
+        -0.276f,
+        -0.447f,
+        -0.851f,
+        0.724f,
+        -0.447f,
+        -0.526f,
+        1.0f,
+        1.0f,
+        1.0f,
+        0.724f,
+        -0.447f,
+        -0.526f,
+        0.000f,
+        -1.000f,
+        0.000f,
+        0.0f,
+        0.0f,
+        0.0f,
+        0.000f,
+        -1.000f,
+        0.000f,
+    };
+
+    const unsigned int _sphereIndices[60] = {
+        0,
+        1,
+        2,
+        0,
+        2,
+        3,
+        0,
+        3,
+        4,
+        0,
+        4,
+        5,
+        0,
+        5,
+        1,
+        1,
+        6,
+        2,
+        2,
+        7,
+        3,
+        3,
+        8,
+        4,
+        4,
+        9,
+        5,
+        5,
+        10,
+        1,
+        6,
+        7,
+        2,
+        7,
+        8,
+        3,
+        8,
+        9,
+        4,
+        9,
+        10,
+        5,
+        10,
+        6,
+        1,
+        6,
+        11,
+        7,
+        7,
+        11,
+        8,
+        8,
+        11,
+        9,
+        9,
+        11,
+        10,
+        10,
+        11,
+        6,
+    };
 };
 
-   const unsigned int _sphereIndices[60] = {
-     0,  1,  2,  0,  2,  3,  0,  3,  4,  0,  4,  5, 
-     0,  5,  1,  1,  6,  2,  2,  7,  3,  3,  8,  4, 
-     4,  9,  5,  5, 10,  1,  6,  7,  2,  7,  8,  3, 
-     8,  9,  4,  9, 10,  5, 10,  6,  1,  6, 11,  7, 
-     7, 11,  8,  8, 11,  9,  9, 11, 10, 10, 11,  6,
-};
-};
-
-
-ShapeManager *ShapeManager::instance = nullptr;
 #endif
