@@ -1,9 +1,8 @@
 #include <Game.h>
 #include <CubeCollider.h>
-#include <ShapeManager.h>
 
 Entity *floor1[10][10];
-Entity root, object, child, grandChild, o2, floor2, wall;
+Entity root, object, child, grandChild, o2, o3, floor2, wall;
 
 Game::GameData Game::data = {};
 
@@ -18,10 +17,12 @@ bool Game::Start()
     object = Entity(Transform(glm::vec3(0.0f, 0.0f, 0.0f)));
     child = Entity(Transform(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.5f, 0.5f)), SPHERE);
     grandChild = Entity(Transform(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.5f, 0.5f)), SPHERE);
-    o2 = Entity(Transform(glm::vec3(10.0f, 0.0f, 0.0f)));
+    o2 = Entity(Transform(glm::vec3(10.0f, 0.0f, 0.0f)), SPHERE);
+    o3 = Entity(Transform(glm::vec3(12.0f, 0.0f, 0.0f)));
     floor2 = Entity(Transform(glm::vec3(0.0f, -20.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(50.0f, 1.0f, 50.0f)), SPHERE);
     wall = Entity(Transform(glm::vec3(25.0f, -20.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 30.0f, 30.0f)));
     root.AddChild(&o2);
+    root.AddChild(&o3);
 
     root.AddChild(&object);
     object.AddChild(&child);
@@ -86,15 +87,11 @@ void Game::RenderEntities(Entity root, unsigned int modelLoc)
         stack.pop();
         if (current->Shape == CUBE)
         {
-            ShapeManager::Instance()->VAO_CUBE->Bind();
             current->DrawMesh(modelLoc);
-            ShapeManager::Instance()->VAO_CUBE->Unbind();
         }
         else
         {
-            ShapeManager::Instance()->VAO_SPHERE->Bind();
             current->DrawMesh(modelLoc);
-            ShapeManager::Instance()->VAO_SPHERE->Unbind();
         }
         for (auto &child : current->children)
         {

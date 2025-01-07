@@ -11,6 +11,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <ShapeType.h>
+#include <ShapeRenderer.h>
 
 class Entity
 {
@@ -29,14 +30,6 @@ public:
 
     Entity(Transform t = Transform(), ShapeType shape = CUBE) : transform(t), Shape(shape)
     {
-        switch (shape)
-        {
-        case CUBE:
-            Entity::CubeEntities.push_back(this);
-            break;
-        case SPHERE:
-            Entity::SphereEntities.push_back(this);
-        }
     }
 
     ~Entity()
@@ -52,6 +45,7 @@ public:
                 delete child;
         }
     }
+
     void AddChild(Entity *child)
     {
         child->parent = &this->transform;
@@ -59,6 +53,7 @@ public:
         child->UpdateTransform();
         children.emplace_back(child);
     }
+
     void UpdateTransform()
     {
         transform.modelMatrix = glm::translate(parent->modelMatrix, transform.pos);
@@ -71,19 +66,12 @@ public:
             child->UpdateTransform();
         }
     }
+
     void DrawMesh(unsigned int modelLoc)
     {
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform.modelMatrix));
-        if (Shape == CUBE)
-        {
-            // glDrawArrays(GL_TRIANGLES, 0, 36);
-            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-        }
-        else
-        {
-            glDrawElements(GL_TRIANGLES, 60, GL_UNSIGNED_INT, 0);
-        }
+        ShapeRenderer::Instance().Draw(Shape, modelLoc, glm::value_ptr(transform.modelMatrix));
     }
+
     void Move(glm::vec3 newPosition)
     {
         if (isStatic)
@@ -97,6 +85,7 @@ public:
             UpdateTransform();
         }
     }
+
     void Rotate(glm::vec3 newRotation)
     {
         if (isStatic)
@@ -110,6 +99,7 @@ public:
             UpdateTransform();
         }
     }
+
     void Scale(glm::vec3 newScale)
     {
         if (isStatic)
@@ -123,10 +113,12 @@ public:
             UpdateTransform();
         }
     }
+
     void SetAsStatic()
     {
         isStatic = true;
     }
+
     void SetAsDynamic()
     {
         isStatic = false;

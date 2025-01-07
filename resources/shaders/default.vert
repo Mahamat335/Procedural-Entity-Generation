@@ -1,7 +1,6 @@
 #version 330 core
 layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aColor;
-layout (location = 2) in vec3 aNormal;
+layout (location = 1) in vec3 aNormal;
 
 
 out vec3 Normal;
@@ -19,5 +18,5 @@ void main()
     //vec3 objectPos = vec3(model[0][3], model[1][3], model[2][3]);
     //FragPos = objectPos * aPos;
     Normal = mat3(transpose(inverse(model))) * aNormal; 
-    Color = aColor;
+    Color = vec3(1.0, 0.5, 0.31);
 }

@@ -18,8 +18,8 @@
 #include <EBO.h>
 #include <Texture.h>
 #include <game.h>
-#include <ShapeManager.h>
 #include <ShapeType.h>
+#include <ShapeRenderer.h>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
@@ -79,41 +79,12 @@ int main()
 	// vsynch
 	// glfwSwapInterval(0);
 
-	float *vertices = const_cast<float *>(ShapeManager::Instance()->GetVertices(SPHERE));
-
-	unsigned int *indices = const_cast<unsigned int *>(ShapeManager::Instance()->GetIndices(SPHERE));
-
-	std::cout << "Vertices: " << vertices << std::endl;
-
 	game.Start();
 
 	// Textures
 
 	Shader shaderProgram("resources/shaders/default.vert", "resources/shaders/default.frag");
-
-	// Vertex Objects
-	VAO VAO1 = *(ShapeManager::Instance()->VAO_CUBE);
-	VAO1.Bind();
-	VBO VBO1(const_cast<float *>(ShapeManager::Instance()->GetVertices(CUBE)), ShapeManager::CubeVerticesSize);
-	EBO EBO1(const_cast<unsigned int *>(ShapeManager::Instance()->GetIndices(CUBE)), ShapeManager::CubeIndicesSize);
-	VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 9 * sizeof(float), (void *)0);
-	VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 9 * sizeof(float), (void *)(3 * sizeof(float)));
-	VAO1.LinkAttrib(VBO1, 2, 3, GL_FLOAT, 9 * sizeof(float), (void *)(6 * sizeof(float)));
-	VAO1.Unbind();
-	VBO1.Unbind();
-	EBO1.Unbind();
-
-	VAO VAO2 = *(ShapeManager::Instance()->VAO_SPHERE);
-	VAO2.Bind();
-	VBO VBO2(const_cast<float *>(ShapeManager::Instance()->GetVertices(SPHERE)), ShapeManager::SphereVerticesSize);
-	EBO EBO2(const_cast<unsigned int *>(ShapeManager::Instance()->GetIndices(SPHERE)), ShapeManager::SphereIndicesSize);
-	VAO2.LinkAttrib(VBO2, 0, 3, GL_FLOAT, 9 * sizeof(float), (void *)0);
-	VAO2.LinkAttrib(VBO2, 1, 3, GL_FLOAT, 9 * sizeof(float), (void *)(3 * sizeof(float)));
-	VAO2.LinkAttrib(VBO2, 2, 3, GL_FLOAT, 9 * sizeof(float), (void *)(6 * sizeof(float)));
-	VAO2.Unbind();
-	VBO2.Unbind();
-	EBO2.Unbind();
-
+	ShapeRenderer::Instance().Setup();
 	shaderProgram.use();
 
 	// shadow
@@ -202,12 +173,7 @@ int main()
 	}
 
 	game.End();
-	VAO1.Delete();
-	VBO1.Delete();
-	EBO1.Delete();
-	VAO2.Delete();
-	VBO2.Delete();
-	EBO2.Delete();
+	ShapeRenderer::Instance().Clear();
 	shaderProgram.deleteProgram();
 	glfwDestroyWindow(window);
 	glfwTerminate();
