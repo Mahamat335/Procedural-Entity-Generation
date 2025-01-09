@@ -1,4 +1,5 @@
 #include <ShapeRenderer.h>
+#include <ShaderManager.h>
 
 void ShapeRenderer::Setup()
 {
@@ -12,8 +13,12 @@ void ShapeRenderer::Clear()
     SphereData::Instance().ClearData();
 };
 
-void ShapeRenderer::Draw(ShapeType shapeType, unsigned int modelLoc, const GLfloat *value)
+void ShapeRenderer::Draw(ShapeType shapeType, unsigned int modelLoc, const GLfloat *value, Material material)
 {
+    Shader shaderProgram = *(ShaderManager::Instance().defaultShaderProgram);
+    shaderProgram.use();
+    shaderProgram.setMaterial("material", material);
+
     switch (shapeType)
     {
     case CUBE:

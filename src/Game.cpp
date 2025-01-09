@@ -1,5 +1,6 @@
 #include <Game.h>
 #include <CubeCollider.h>
+#include <Material.h>
 
 Entity *floor1[10][10];
 Entity root, object, child, grandChild, o2, o3, floor2, wall;
@@ -14,13 +15,13 @@ bool Game::Start()
 {
     data = {};
     root;
-    object = Entity(Transform(glm::vec3(0.0f, 0.0f, 0.0f)));
-    child = Entity(Transform(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.5f, 0.5f)), SPHERE);
-    grandChild = Entity(Transform(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.5f, 0.5f)), SPHERE);
-    o2 = Entity(Transform(glm::vec3(10.0f, 0.0f, 0.0f)), SPHERE);
-    o3 = Entity(Transform(glm::vec3(12.0f, 0.0f, 0.0f)));
-    floor2 = Entity(Transform(glm::vec3(0.0f, -20.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(50.0f, 1.0f, 50.0f)), SPHERE);
-    wall = Entity(Transform(glm::vec3(25.0f, -20.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 30.0f, 30.0f)));
+    object = Entity(Transform(glm::vec3(0.0f, 0.0f, 0.0f)), CUBE, Emerald);
+    child = Entity(Transform(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.5f, 0.5f)), SPHERE, RedPlastic);
+    grandChild = Entity(Transform(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.5f, 0.5f)), SPHERE, CyanPlastic);
+    o2 = Entity(Transform(glm::vec3(10.0f, 0.0f, 0.0f)), SPHERE, GreenRubber);
+    o3 = Entity(Transform(glm::vec3(12.0f, 0.0f, 0.0f)), CUBE, YellowRubber);
+    floor2 = Entity(Transform(glm::vec3(0.0f, -20.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(50.0f, 1.0f, 50.0f)), SPHERE, Chrome);
+    wall = Entity(Transform(glm::vec3(25.0f, -20.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 30.0f, 30.0f)), CUBE, Gold);
     root.AddChild(&o2);
     root.AddChild(&o3);
 

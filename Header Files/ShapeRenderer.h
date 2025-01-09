@@ -9,6 +9,8 @@
 #include <EBO.h>
 #include <ShapeType.h>
 #include <Singleton.h>
+#include <Shader.h>
+#include <Material.h>
 
 class ShapeRenderer : public Singleton<ShapeRenderer>
 {
@@ -17,7 +19,7 @@ class ShapeRenderer : public Singleton<ShapeRenderer>
 public:
     void Setup();
     void Clear();
-    void Draw(ShapeType shapeType, unsigned int modelLoc, const GLfloat *value);
+    void Draw(ShapeType shapeType, unsigned int modelLoc, const GLfloat *value, Material material);
 };
 
 class CubeData : public Singleton<CubeData>
@@ -52,7 +54,7 @@ private:
     VAO *CurrentVAO;
     VBO *CurrentVBO;
     EBO *CurrentEBO;
-    int detailLevel = 10;
+    int detailLevel = 20;
     int vertexCount;
     int indexCount;
     float *GetVertices();

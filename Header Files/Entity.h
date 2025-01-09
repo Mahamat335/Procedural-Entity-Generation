@@ -12,6 +12,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <ShapeType.h>
 #include <ShapeRenderer.h>
+#include <Material.h>
 
 class Entity
 {
@@ -27,8 +28,9 @@ public:
     ShapeType Shape;
     static std::vector<Entity *> CubeEntities;
     static std::vector<Entity *> SphereEntities;
+    Material material;
 
-    Entity(Transform t = Transform(), ShapeType shape = CUBE) : transform(t), Shape(shape)
+    Entity(Transform t = Transform(), ShapeType shape = CUBE, Material material = Emerald) : transform(t), Shape(shape), material(material)
     {
     }
 
@@ -69,7 +71,7 @@ public:
 
     void DrawMesh(unsigned int modelLoc)
     {
-        ShapeRenderer::Instance().Draw(Shape, modelLoc, glm::value_ptr(transform.modelMatrix));
+        ShapeRenderer::Instance().Draw(Shape, modelLoc, glm::value_ptr(transform.modelMatrix), material);
     }
 
     void Move(glm::vec3 newPosition)

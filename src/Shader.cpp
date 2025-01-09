@@ -101,6 +101,14 @@ void Shader::setVec3(const std::string &name, const glm::vec3 &value) const
     glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
 }
 
+void Shader::setMaterial(const std::string &name, const Material &material) const
+{
+    glUniform3fv(glGetUniformLocation(ID, (name + ".ambient").c_str()), 1, &material.ambient[0]);
+    glUniform3fv(glGetUniformLocation(ID, (name + ".diffuse").c_str()), 1, &material.diffuse[0]);
+    glUniform3fv(glGetUniformLocation(ID, (name + ".specular").c_str()), 1, &material.specular[0]);
+    glUniform1f(glGetUniformLocation(ID, (name + ".shininess").c_str()), material.shininess);
+}
+
 void Shader::deleteProgram()
 {
     glDeleteProgram(ID);

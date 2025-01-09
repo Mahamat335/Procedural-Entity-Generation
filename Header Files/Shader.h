@@ -8,6 +8,7 @@
 #include <sstream>
 #include <iostream>
 #include <glm/glm.hpp>
+#include <Material.h>
 
 class Shader
 {
@@ -25,6 +26,7 @@ public:
     void setInt(const std::string &name, int value) const;
     void setFloat(const std::string &name, float value) const;
     void setVec3(const std::string &name, const glm::vec3 &value) const;
+    void setMaterial(const std::string &name, const Material &material) const;
 };
 
 #endif
