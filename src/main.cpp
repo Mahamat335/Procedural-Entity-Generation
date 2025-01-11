@@ -80,15 +80,14 @@ int main()
 	// vsynch
 	// glfwSwapInterval(0);
 
-	game.Start();
-
 	// Textures
 
 	Shader shaderProgram = *(ShaderManager::Instance().defaultShaderProgram);
 	ShapeRenderer::Instance().Setup();
-	shaderProgram.use();
 
 	float lastCheck = 0;
+
+	game.Start();
 	while (!glfwWindowShouldClose(window))
 	{
 		float currentFrame = static_cast<float>(glfwGetTime());
@@ -111,20 +110,8 @@ int main()
 		glm::mat4 view = camera.GetViewMatrix();
 		glm::mat4 projection = glm::mat4(1.0f);
 		projection = glm::perspective(glm::radians(camera.Zoom), (float)width / (float)height, 0.1f, 100.0f);
-		// lighting calculations
-		unsigned int lightColorLoc = glGetUniformLocation(shaderProgram.ID, "lightColor");
-		unsigned int lightPosLoc = glGetUniformLocation(shaderProgram.ID, "lightPos");
-		shaderProgram.setVec3("viewPos", camera.Position);
-		glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f);
-		glUniform3f(lightPosLoc, 27.0f, 2.0f, 0.0f);
 
-		shaderProgram.setVec3("pointLights[0].position", glm::vec3(2.0f, 2.0f, 0.0f));
-		shaderProgram.setVec3("pointLights[0].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-		shaderProgram.setVec3("pointLights[0].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-		shaderProgram.setVec3("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
-		shaderProgram.setFloat("pointLights[0].constant", 1.0f);
-		shaderProgram.setFloat("pointLights[0].linear", 0.09f);
-		shaderProgram.setFloat("pointLights[0].quadratic", 0.032f);
+		shaderProgram.setVec3("viewPos", camera.Position);
 
 		// retrieve the matrix uniform locations
 
@@ -134,7 +121,6 @@ int main()
 		// note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-		// VAO1.Bind();
 		unsigned int modelLoc = glGetUniformLocation(shaderProgram.ID, "model");
 		game.data.modelLoc = modelLoc;
 
