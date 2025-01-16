@@ -21,6 +21,8 @@ void ShapeRenderer::Draw(ShapeType shapeType, unsigned int modelLoc, const GLflo
 
     switch (shapeType)
     {
+    case POINT:
+        break;
     case CUBE:
         CubeData::Instance().DrawShape(modelLoc, value);
         break;

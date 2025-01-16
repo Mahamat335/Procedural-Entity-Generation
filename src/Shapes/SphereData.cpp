@@ -33,7 +33,7 @@ float *SphereData::GetVertices()
 {
     float *vertices = nullptr;
 
-    float radius = 1.0f;
+    float radius = 0.5f;
 
     // Calculate the number of vertices
     vertexCount = (detailLevel) * (detailLevel) * 6;

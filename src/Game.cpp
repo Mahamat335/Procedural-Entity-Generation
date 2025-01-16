@@ -2,11 +2,14 @@
 #include <CubeCollider.h>
 #include <Material.h>
 #include <Lights.h>
+#include <ctime>
 
 Entity *floor1[10][10];
-Entity root, object, child, grandChild, o2, o3, floor2, wall;
-
+Entity root, object, child, grandChild, o2, o3, floor2, wall, spider, sBody, *sUpperLegs[6], *sLowerLegs[6], *sUpperLegsPivot[6], *sLowerLegsPivot[6];
+const glm::vec3 BodySize(1.0f, 1.0f, 1.0f), UpperLegSize(0.1f, 1.0f, 0.1f), LowerLegSize(0.1f, 1.5f, 0.1f), LegRotationAngle(30.0f, 0.0f, 0.0f);
+glm::vec3 SpiderLocation(8.0f, 3.0f, 7.0f);
 Game::GameData Game::data = {};
+const float RotationAngle = 60.0f;
 
 Game::Game()
 {
@@ -46,6 +49,34 @@ bool Game::Start()
         }
     }
 
+    spider = Entity(Transform(SpiderLocation, glm::vec3(), BodySize), SPHERE, Obsidian);
+    root.AddChild(&spider);
+
+    float r = BodySize.y * 0.5f;                        // Kürenin yarıçapı
+    float verticalAngle = -glm::pi<float>() / 6.0f;     // Dikey açı (kürenin alt tarafına yakın)
+    float horizontalStep = glm::two_pi<float>() / 6.0f; // 6 bacak için eşit yatay açı
+
+    for (int i = 0; i < 6; i++)
+    {
+        float theta = i * horizontalStep; // Her bacak için yatay açı
+        float phi = verticalAngle;        // Sabit dikey açı
+
+        // Kürenin yüzeyindeki noktaları hesapla
+        float x = r * cos(phi) * sin(theta);
+        float y = r * sin(phi);
+        float z = r * cos(phi) * cos(theta);
+
+        // Pivot noktasını tanımla
+        sUpperLegsPivot[i] = new Entity(Transform(glm::vec3(x, y, z), LegRotationAngle * (z > 0 ? 1.0f : -1.0f), glm::vec3(0.01f, 0.01f, 0.01f)), CUBE);
+        sUpperLegs[i] = new Entity(Transform(UpperLegSize * 0.5f * glm::vec3(0.0f, 100.0f, 0.0f), glm::vec3(), UpperLegSize * glm::vec3(100.0f, 100.0f, 100.0f)), SPHERE, Ruby);
+        sLowerLegsPivot[i] = new Entity(Transform(UpperLegSize * glm::vec3(0.0f, 100.0f, 0.0f), LegRotationAngle * (z > 0 ? 4.0f : -4.0f)), CUBE);
+        sLowerLegs[i] = new Entity(Transform(LowerLegSize * 0.5f * glm::vec3(0.0f, 100.0f, 0.0f), glm::vec3(), LowerLegSize * glm::vec3(100.0f, 100.0f, 100.0f)), SPHERE, Ruby);
+        spider.AddChild(sUpperLegsPivot[i]);
+        sUpperLegsPivot[i]->AddChild(sUpperLegs[i]);
+        sUpperLegsPivot[i]->AddChild(sLowerLegsPivot[i]);
+        sLowerLegsPivot[i]->AddChild(sLowerLegs[i]);
+    }
+
     // Light Calculations
     DirectionalLight directionalLight(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(-0.5f, -1.0f, -0.5f));
     PointLight pointLight(0, glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f));
@@ -72,6 +103,13 @@ bool Game::Update(float deltaTime)
     child.Rotate(glm::vec3((float)glfwGetTime() * 50, (float)glfwGetTime() * 30, (float)glfwGetTime() * 10) + object.transform.eulerRot);
     grandChild.Rotate(glm::vec3((float)glfwGetTime() * -50, (float)glfwGetTime() * -30, (float)glfwGetTime() * -10) + object.transform.eulerRot);
 
+    // spider movement
+    spider.Move(data.playerVel + spider.transform.pos);
+    /*  for (int i = 0; i < 6; i++)
+     {
+         sLowerLegsPivot[i]->Rotate(sLowerLegsPivot[i]->transform.eulerRot + glm::vec3(0.0f, 0.0f, cos(std::time(NULL) * RotationAngle)));
+     }
+  */
     PointLight pointLight(1, object.transform.pos, glm::vec3(1.0f, 0.2f, 1.0f));
 
     RenderEntities(root, data.modelLoc);

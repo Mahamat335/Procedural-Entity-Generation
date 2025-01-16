@@ -3,6 +3,7 @@
 
 enum ShapeType
 {
+    POINT,
     CUBE,
     SPHERE,
 };

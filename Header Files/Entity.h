@@ -30,7 +30,7 @@ public:
     static std::vector<Entity *> SphereEntities;
     Material material;
 
-    Entity(Transform t = Transform(), ShapeType shape = CUBE, Material material = Emerald) : transform(t), Shape(shape), material(material)
+    Entity(Transform t = Transform(), ShapeType shape = POINT, Material material = Emerald) : transform(t), Shape(shape), material(material)
     {
     }
 
