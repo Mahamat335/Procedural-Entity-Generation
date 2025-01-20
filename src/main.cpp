@@ -28,8 +28,8 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 void ChangePolygonMode();
 
-const unsigned int width = 800;
-const unsigned int height = 800;
+const unsigned int width = 1600;
+const unsigned int height = 1600;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));

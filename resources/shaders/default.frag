@@ -67,6 +67,7 @@ vec3 CalculateSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir
 
 const bool blinn = true;
 const float gamma = 2.2f;
+const float ambientMultiplier = 10.0f;
 
 void main()
 {
@@ -93,7 +94,7 @@ void main()
 
 vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir)
 {
-    vec3 ambientColor = pow(material.ambient, vec3(1 / gamma));
+    vec3 ambientColor = pow(material.ambient * ambientMultiplier, vec3(1 / gamma));
     vec3 diffuseColor = pow(material.diffuse, vec3(1 / gamma));
     vec3 specularColor = pow(material.specular, vec3(1 / gamma));
 
@@ -123,7 +124,7 @@ vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir
 
 vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
-    vec3 ambientColor = pow(material.ambient, vec3(1 / gamma));
+    vec3 ambientColor = pow(material.ambient * ambientMultiplier, vec3(1 / gamma));
     vec3 diffuseColor = pow(material.diffuse, vec3(1 / gamma));
     vec3 specularColor = pow(material.specular, vec3(1 / gamma));
 
@@ -157,7 +158,7 @@ vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewD
 
 vec3 CalculateSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
-    vec3 ambientColor = pow(material.ambient, vec3(1 / gamma));
+    vec3 ambientColor = pow(material.ambient * ambientMultiplier, vec3(1 / gamma));
     vec3 diffuseColor = pow(material.diffuse, vec3(1 / gamma));
     vec3 specularColor = pow(material.specular, vec3(1 / gamma));
 
