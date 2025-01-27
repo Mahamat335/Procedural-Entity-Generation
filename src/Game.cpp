@@ -7,11 +7,12 @@
 
 Entity *floor1[10][10];
 Entity root, object, child, grandChild, o2, o3, floor2, wall, spider, sBody, *sUpperLegs[6], *sLowerLegs[6], *sUpperLegsPivot[6], *sLowerLegsPivot[6];
-const glm::vec3 BodySize(0.8f, 0.4f, 1.0f), UpperLegSize(0.1f, 1.0f, 0.1f), LowerLegSize(0.1f, 1.5f, 0.1f), UpperLegRotationAngle(0.0f, 0.0f, 30.0f), LowerLegRotationAngle(0.0f, 0.0f, 120.0f);
+const glm::vec3 BodySize(0.8f, 0.4f, 1.0f), UpperLegSize(0.05f, 1.25f, 0.05f), MiddleLegSize(0.05f, 1.0f, 0.05f), LowerLegSize(0.05f, 0.5f, 0.05f), UpperLegRotationAngle(0.0f, 0.0f, 60.0f), MiddleLegRotationAngle(0.0f, 0.0f, 60.0f), LowerLegRotationAngle(0.0f, 0.0f, 60.0f);
 glm::vec3 SpiderLocation(8.0f, 3.0f, 7.0f);
 Game::GameData Game::data = {};
 const int LegCount = 6;
 const float HipLocationAsDegree = 30.0f;
+std::vector<Spider *> spiders;
 
 Game::Game()
 {
@@ -51,10 +52,16 @@ bool Game::Start()
         }
     }
 
-    Spider spider(SpiderLocation, LegCount, 30.0f, BodySize, UpperLegSize, LowerLegSize, UpperLegRotationAngle, LowerLegRotationAngle);
-    std::cout << 2;
-    root.AddChild(spider.GetEntity());
-    std::cout << 3;
+    for (int i = 2; i < 18; i += 2)
+    {
+        for (int j = 2; j < 18; j += 2)
+        {
+            Spider *spider = new Spider(SpiderLocation + glm::vec3(j * 8.0f, i * 2.0f, 0.0f), i, 30.0f, BodySize, UpperLegSize * (j / 4.0f), MiddleLegSize * (j / 4.0f), LowerLegSize * (j / 4.0f), UpperLegRotationAngle, MiddleLegRotationAngle, LowerLegRotationAngle);
+            root.AddChild(spider->GetEntity());
+            spiders.emplace_back(spider);
+        }
+    }
+
     // Light Calculations
     DirectionalLight directionalLight(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(-0.5f, -1.0f, -0.5f));
     PointLight pointLight(0, glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f));
@@ -82,11 +89,10 @@ bool Game::Update(float deltaTime)
     grandChild.Rotate(glm::vec3((float)glfwGetTime() * -50, (float)glfwGetTime() * -30, (float)glfwGetTime() * -10) + object.transform.eulerRot);
 
     // spider movement
-    /* spider.Move(data.playerVel + spider.transform.pos); */
-    /*  for (int i = 0; i < 6; i++)
-     {
-         sLowerLegsPivot[i]->Rotate(sLowerLegsPivot[i]->transform.eulerRot + glm::vec3(0.0f, 0.0f, cos(std::time(NULL) * RotationAngle)));
-     } */
+    for (Spider *spider : spiders)
+    {
+        spider->Move(deltaTime);
+    }
 
     PointLight pointLight(1, object.transform.pos, glm::vec3(1.0f, 0.2f, 1.0f));
 

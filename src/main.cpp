@@ -28,8 +28,8 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 void ChangePolygonMode();
 
-const unsigned int width = 1600;
-const unsigned int height = 1600;
+const unsigned int width = 1200;
+const unsigned int height = 1200;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -153,6 +153,12 @@ void processInput(GLFWwindow *window)
 		camera.ProcessKeyboard(LEFT, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera.ProcessKeyboard(RIGHT, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_COMMA) == GLFW_PRESS)
+		camera.SetSpeed(camera.MovementSpeed - 0.1f);
+	if (glfwGetKey(window, GLFW_KEY_PERIOD) == GLFW_PRESS)
+		camera.SetSpeed(camera.MovementSpeed + 0.1f);
+	if (glfwGetKey(window, GLFW_KEY_SLASH) == GLFW_PRESS)
+		camera.SetSpeed();
 
 	game.data.playerVel = glm::vec3(0.0f, 0.0f, 0.0f);
 	game.data.playerAngularSpeed = 0;
