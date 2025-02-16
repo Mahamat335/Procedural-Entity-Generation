@@ -1,9 +1,9 @@
 #include <Spider.h>
 #include <ctime>
 
-Spider::Spider(glm::vec3 SpiderLocation, int LegCount, float HipLocationAsDegree, glm::vec3 BodySize, glm::vec3 UpperLegSize, glm::vec3 MiddleLegSize, glm::vec3 LowerLegSize, glm::vec3 UpperLegRotationAngle, glm::vec3 MiddleLegRotationAngle, glm::vec3 LowerLegRotationAngle) : _spiderLocation(SpiderLocation), _legCount(LegCount), _hipLocationAsDegree(HipLocationAsDegree), _bodySize(BodySize), _upperLegSize(UpperLegSize), _middleLegSize(MiddleLegSize), _lowerLegSize(LowerLegSize), _upperLegRotationAngle(UpperLegRotationAngle), _middleLegRotationAngle(MiddleLegRotationAngle), _lowerLegRotationAngle(LowerLegRotationAngle)
+Spider::Spider(Transform SpiderTransform, int LegCount, float HipLocationAsDegree, glm::vec3 BodySize, glm::vec3 UpperLegSize, glm::vec3 MiddleLegSize, glm::vec3 LowerLegSize, glm::vec3 UpperLegRotationAngle, glm::vec3 MiddleLegRotationAngle, glm::vec3 LowerLegRotationAngle, float MoveSpeed) : _spiderTransform(SpiderTransform), _legCount(LegCount), _hipLocationAsDegree(HipLocationAsDegree), _bodySize(BodySize), _upperLegSize(UpperLegSize), _middleLegSize(MiddleLegSize), _lowerLegSize(LowerLegSize), _upperLegRotationAngle(UpperLegRotationAngle), _middleLegRotationAngle(MiddleLegRotationAngle), _lowerLegRotationAngle(LowerLegRotationAngle), _moveSpeed(MoveSpeed)
 {
-    _spiderEntity = new Entity(Transform(SpiderLocation));
+    _spiderEntity = new Entity(_spiderTransform);
     _sBody = new Entity(Transform(glm::vec3(), glm::vec3(), _bodySize), SPHERE, Obsidian);
 
     _spiderEntity->AddChild(_sBody);
@@ -22,7 +22,8 @@ Spider::Spider(glm::vec3 SpiderLocation, int LegCount, float HipLocationAsDegree
         float z = (_bodySize.z * 0.5f) * cos(phi) * cos(theta);
 
         // Pivot noktasını tanımla
-        _sUpperLegsPivot.emplace_back(new Entity(Transform(glm::vec3(x, y, z), _upperLegRotationAngle + glm::vec3(0.0f, (i >= _legCount / 2 ? 0.0f : 180.0f), (float)(i - _legCount / 2) * (15.0f / (float)(_legCount))))));
+        float zUpper = (float)(i - _legCount / 2);
+        _sUpperLegsPivot.emplace_back(new Entity(Transform(glm::vec3(x, y, z), _upperLegRotationAngle + glm::vec3(0.0f, (i >= _legCount / 2 ? 0.0f : 180.0f), zUpper * (15.0f / (float)(_legCount))))));
         _sUpperLegs.emplace_back(new Entity(Transform(_upperLegSize * glm::vec3(0.0f, 0.5f, 0.0f), glm::vec3(), _upperLegSize), SPHERE, Ruby));
         _sMiddleLegsPivot.emplace_back(new Entity(Transform(_upperLegSize * glm::vec3(0.0f, 1.0f, 0.0f), _middleLegRotationAngle)));
         _sMiddleLegs.emplace_back(new Entity(Transform(_middleLegSize * glm::vec3(0.0f, 0.5f, 0.0f), glm::vec3(), _middleLegSize), SPHERE, Ruby));
@@ -36,7 +37,7 @@ Spider::Spider(glm::vec3 SpiderLocation, int LegCount, float HipLocationAsDegree
         _sMiddleLegsPivot.at(i)->AddChild(_sMiddleLegs.at(i));
         _sLowerLegsPivot.at(i)->AddChild(_sLowerLegs.at(i));
     }
-    _rotationDirections = std::vector<float>(_sUpperLegsPivot.size(), 1.0f);
+    _rotationDirections = std::vector<glm::vec2>(_sUpperLegsPivot.size(), glm::vec2(1.0f, 1.0f));
 }
 
 Entity *Spider::GetEntity()
@@ -46,26 +47,47 @@ Entity *Spider::GetEntity()
 
 void Spider::Move(float deltaTime)
 {
-    float RotationAngle = 5.0f;  // Bacakların maksimum dönüş açısı
+    float RotationAngleZ = 5.0f; // Bacakların maksimum dönüş açısı
+    float RotationAngleY = 5.0f; // Bacakların maksimum dönüş açısı
     float RotationSpeed = 20.0f; // Dönüş hızı
 
     for (size_t i = 0; i < _sUpperLegsPivot.size(); ++i)
     {
         Entity *pivot = _sUpperLegsPivot[i];
-        float currentRotationZ = pivot->transform.eulerRot.z;
+        glm::vec3 currentRotation = pivot->transform.eulerRot;
 
         // Dönüş yönünü kontrol et ve değiştir
-        if (currentRotationZ > RotationAngle + _upperLegRotationAngle.z)
+        if (currentRotation.z > _upperLegRotationAngle.z)
         {
-            _rotationDirections[i] = -1.0f; // Yön değiştir
+            _rotationDirections[i][0] = -1.0f; // Yön değiştir
         }
-        else if (currentRotationZ < -RotationAngle + _upperLegRotationAngle.z)
+        else if (currentRotation.z < _upperLegRotationAngle.z - RotationAngleZ * 2)
         {
-            _rotationDirections[i] = 1.0f; // Yön değiştir
+            _rotationDirections[i][0] = 1.0f; // Yön değiştir
         }
+        /*
+                if (currentRotation.y > RotationAngleY + _upperLegRotationAngle.y + (i >= _legCount / 2 ? 0.0f : 180.0f))
+                {
+                    _rotationDirections[i][1] = -1.0f; // Yön değiştir
+                }
+                else if (currentRotation.y < -RotationAngleY + _upperLegRotationAngle.y + (i >= _legCount / 2 ? 0.0f : 180.0f))
+                {
+                    _rotationDirections[i][1] = 1.0f; // Yön değiştir
+                }
 
-        // Pivot'u yeni yön ve hız ile döndür
+                // Pivot'u yeni yön ve hız ile döndür
+                pivot->Rotate(pivot->transform.eulerRot +
+                              glm::vec3(0.0f, _rotationDirections[i][1] * RotationSpeed * deltaTime, _rotationDirections[i][0] * RotationSpeed * deltaTime)); */
+
         pivot->Rotate(pivot->transform.eulerRot +
-                      glm::vec3(0.0f, 0.0f, _rotationDirections[i] * RotationSpeed * deltaTime));
+                      glm::vec3(0.0f, 0.0f, _rotationDirections[i][0] * RotationSpeed * deltaTime));
+        float rotation = _spiderTransform.eulerRot.y * glm::pi<float>() / 180.0f;
+        glm::vec3 direction = glm::vec3(sin(rotation), 0.0f, cos(rotation));
+        _spiderEntity->Move(_spiderEntity->transform.pos + direction * _moveSpeed * deltaTime);
     }
+}
+
+void Spider::Patrol()
+{
+    _moveSpeed *= -1.0f;
 }

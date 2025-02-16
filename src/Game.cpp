@@ -5,14 +5,17 @@
 #include <ctime>
 #include <Spider.h>
 
-Entity *floor1[10][10];
-Entity root, object, child, grandChild, o2, o3, floor2, wall, spider, sBody, *sUpperLegs[6], *sLowerLegs[6], *sUpperLegsPivot[6], *sLowerLegsPivot[6];
-const glm::vec3 BodySize(0.8f, 0.4f, 1.0f), UpperLegSize(0.05f, 1.25f, 0.05f), MiddleLegSize(0.05f, 1.0f, 0.05f), LowerLegSize(0.05f, 0.5f, 0.05f), UpperLegRotationAngle(0.0f, 0.0f, 60.0f), MiddleLegRotationAngle(0.0f, 0.0f, 60.0f), LowerLegRotationAngle(0.0f, 0.0f, 60.0f);
-glm::vec3 SpiderLocation(8.0f, 3.0f, 7.0f);
+Entity root, area, spider, sBody, *sUpperLegs[6], *sLowerLegs[6], *sUpperLegsPivot[6], *sLowerLegsPivot[6];
+const glm::vec3 AreaSize(70.0f, 0.1f, 70.0f), BodySize(0.8f, 0.4f, 1.0f), UpperLegSize(0.05f, 1.25f, 0.05f), MiddleLegSize(0.05f, 1.0f, 0.05f), LowerLegSize(0.05f, 0.5f, 0.05f), UpperLegRotationAngle(0.0f, -5.0f, 60.0f), MiddleLegRotationAngle(0.0f, 0.0f, 60.0f), LowerLegRotationAngle(0.0f, 0.0f, 60.0f);
+glm::vec3 SpiderLocation(-35.0f, -5.0f, -35.0f);
+glm::vec3 SpiderSize(1.0f, 1.0f, 1.0f);
+float MoveSpeed = 0.5f;
 Game::GameData Game::data = {};
 const int LegCount = 6;
 const float HipLocationAsDegree = 30.0f;
 std::vector<Spider *> spiders;
+float patrolTimer = 0.0f;
+float patrolTime = 4.0f;
 
 Game::Game()
 {
@@ -21,49 +24,25 @@ Game::Game()
 bool Game::Start()
 {
     data = {};
-    root;
-    object = Entity(Transform(glm::vec3(0.0f, 0.0f, 0.0f)), CUBE, Emerald);
-    child = Entity(Transform(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.5f, 0.5f)), SPHERE, RedPlastic);
-    grandChild = Entity(Transform(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.5f, 0.5f)), SPHERE, CyanPlastic);
-    o2 = Entity(Transform(glm::vec3(10.0f, 0.0f, 0.0f)), SPHERE, Turquoise);
-    o3 = Entity(Transform(glm::vec3(12.0f, 0.0f, 0.0f)), CUBE, YellowRubber);
-    floor2 = Entity(Transform(glm::vec3(0.0f, -20.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(50.0f, 1.0f, 50.0f)), SPHERE, Chrome);
-    wall = Entity(Transform(glm::vec3(25.0f, -20.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 30.0f, 30.0f)), CUBE, Gold);
-    root.AddChild(&o2);
-    root.AddChild(&o3);
-
-    root.AddChild(&object);
-    object.AddChild(&child);
-    child.AddChild(&grandChild);
-
-    root.AddChild(&floor2);
-    root.AddChild(&wall);
-
-    for (int i = 0; i < 10; i++)
+    area = Entity(Transform(glm::vec3(0.0f, -5.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), AreaSize), CUBE, Silver);
+    root.AddChild(&area);
+    for (int i = 2; i < 10; i += 2)
     {
-        for (int j = 0; j < 10; j++)
+        for (int j = 2; j < 10; j += 2)
         {
-            floor1[i][j] = new Entity(Transform(glm::vec3((float)i, -10.0f, (float)j)));
-            root.AddChild(floor1[i][j]);
-            if (i % 5 && j % 5)
-                floor1[i][j]->isEnable = false;
-            if ((i % 5 == 2 || i % 5 == 3) && (j % 5 == 2 || j % 5 == 3))
-                floor1[i][j]->isEnable = true;
-        }
-    }
-
-    for (int i = 2; i < 18; i += 2)
-    {
-        for (int j = 2; j < 18; j += 2)
-        {
-            Spider *spider = new Spider(SpiderLocation + glm::vec3(j * 8.0f, i * 2.0f, 0.0f), i, 30.0f, BodySize, UpperLegSize * (j / 4.0f), MiddleLegSize * (j / 4.0f), LowerLegSize * (j / 4.0f), UpperLegRotationAngle, MiddleLegRotationAngle, LowerLegRotationAngle);
+            float deg2rad = glm::pi<float>() / 180.0f;
+            float a = UpperLegRotationAngle.z, b = MiddleLegRotationAngle.z, c = LowerLegRotationAngle.z;
+            float bodyHeight = cos(a * deg2rad) * UpperLegSize.y + cos((a + b) * deg2rad) * MiddleLegSize.y + cos((a + b + c) * deg2rad) * LowerLegSize.y;
+            float randomRotation = (rand() % 360) - 180;
+            bodyHeight -= BodySize.y * sin(HipLocationAsDegree * deg2rad) * 0.5f;
+            Spider *spider = new Spider(Transform(SpiderLocation + glm::vec3(j * 6.0f, -bodyHeight, i * 6.0f), glm::vec3(0.0f, randomRotation, 0.0f), SpiderSize), i, HipLocationAsDegree, BodySize, UpperLegSize * (j / 4.0f), MiddleLegSize * (j / 4.0f), LowerLegSize * (j / 4.0f), UpperLegRotationAngle, MiddleLegRotationAngle, LowerLegRotationAngle, MoveSpeed);
             root.AddChild(spider->GetEntity());
             spiders.emplace_back(spider);
         }
     }
 
     // Light Calculations
-    DirectionalLight directionalLight(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(-0.5f, -1.0f, -0.5f));
+    DirectionalLight directionalLight(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(-0.5f, -0.2f, -0.5f));
     PointLight pointLight(0, glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
     return true;
@@ -71,30 +50,20 @@ bool Game::Start()
 
 bool Game::Update(float deltaTime)
 {
-
-    /* CubeCollider *c1 = new CubeCollider(&object, object.transform.pos, glm::vec3(1.0f, 1.0f, 1.0f));
-
-    CubeCollider *c2 = new CubeCollider(&o2, o2.transform.pos, glm::vec3(1.0f, 1.0f, 1.0f));
-    if (c1->CheckForCollision(c2))
+    if (patrolTimer > patrolTime)
     {
-        // std::cout << 1;
-    } */
-    for (int i = 0; i < 10; i++)
-        for (int j = 0; j < 10; j++)
-            floor1[i][j]->Rotate(floor1[i][j]->transform.eulerRot + glm::vec3(20 * deltaTime, 15 * deltaTime, (200 - i - j) * deltaTime));
-    object.Move(data.playerVel + object.transform.pos);
-    object.Rotate(glm::vec3(0.0f, (float)deltaTime * 50, 0.0f) + object.transform.eulerRot);
-    object.Rotate(glm::vec3(0.0f, 0.0f, (float)deltaTime * 90 * data.playerAngularSpeed) + object.transform.eulerRot);
-    child.Rotate(glm::vec3((float)glfwGetTime() * 50, (float)glfwGetTime() * 30, (float)glfwGetTime() * 10) + object.transform.eulerRot);
-    grandChild.Rotate(glm::vec3((float)glfwGetTime() * -50, (float)glfwGetTime() * -30, (float)glfwGetTime() * -10) + object.transform.eulerRot);
-
+        for (Spider *spider : spiders)
+        {
+            spider->Patrol();
+        }
+        patrolTimer = 0.0f;
+    }
+    patrolTimer += deltaTime;
     // spider movement
     for (Spider *spider : spiders)
     {
         spider->Move(deltaTime);
     }
-
-    PointLight pointLight(1, object.transform.pos, glm::vec3(1.0f, 0.2f, 1.0f));
 
     RenderEntities(root, data.modelLoc);
 }
