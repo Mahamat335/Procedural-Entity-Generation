@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <stack>
-#include <Entity.h>
+#include <Node.h>
 #include <Transform.h>
 #include <glm/glm.hpp>
 #include <Collider.h>
@@ -27,7 +27,7 @@ public:
     bool Start();
     bool Update(float deltaTime);
     void End();
-    void RenderEntities(Entity root, unsigned int modelLoc);
+    void RenderEntities(Node root, unsigned int modelLoc);
 };
 
 #endif // GAME_H

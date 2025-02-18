@@ -8,7 +8,7 @@ class SphereCollider : public Collider
 
 public:
     float radius;
-    SphereCollider(Entity *parent, glm::vec3 center, float radius);
+    SphereCollider(Node *parent, glm::vec3 center, float radius);
     virtual bool CheckForCollision(SphereCollider *collision);
 };
 

@@ -6,7 +6,7 @@
 #include <iostream>
 #include <stack>
 #include <vector>
-#include <Entity.h>
+#include <Node.h>
 #include <Transform.h>
 #include <glm/glm.hpp>
 
@@ -16,8 +16,8 @@ class Collider
 public:
     glm::vec3 center;
     std::vector<Collider *> collisions;
-    Entity *parent;
-    Collider(Entity *parent, glm::vec3 center);
+    Node *parent;
+    Collider(Node *parent, glm::vec3 center);
     virtual bool CheckForCollision(Collider *collision) = 0;
     // virtual bool CheckForCollision(SphereCollider *collision) = 0;
     void OnCollisionEnter(Collider *collision);

@@ -1,6 +1,6 @@
 #include <Collider.h>
 
-Collider::Collider(Entity *parent, glm::vec3 center) //: parent(parent), center(parent->transform.pos)
+Collider::Collider(Node *parent, glm::vec3 center) //: parent(parent), center(parent->transform.pos)
 {
 }
 

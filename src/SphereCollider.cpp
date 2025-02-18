@@ -1,6 +1,6 @@
 #include <SphereCollider.h>
 
-SphereCollider::SphereCollider(Entity *parent, glm::vec3 center, float radius) : Collider(parent, center), radius(radius)
+SphereCollider::SphereCollider(Node *parent, glm::vec3 center, float radius) : Collider(parent, center), radius(radius)
 {
 }
 

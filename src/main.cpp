@@ -6,7 +6,7 @@
 #include <memory>
 #include <Shader.h>
 #include <Camera.h>
-#include <Entity.h>
+#include <Node.h>
 #include <Transform.h>
 #include <math.h>
 #include <stb/stb_image.h>
@@ -17,7 +17,7 @@
 #include <VBO.h>
 #include <EBO.h>
 #include <Texture.h>
-#include <game.h>
+#include <Game.h>
 #include <ShapeType.h>
 #include <ShapeRenderer.h>
 #include <ShaderManager.h>

@@ -1,5 +1,5 @@
-#ifndef Entity_H
-#define Entity_H
+#ifndef NODE_H
+#define NODE_H
 
 #include <glad/glad.h>
 #include <Transform.h>
@@ -14,27 +14,27 @@
 #include <ShapeRenderer.h>
 #include <Material.h>
 
-class Entity
+class Node
 {
 
 public:
     Transform transform;
-    // std::vector<std::unique_ptr<Entity>> children;
-    std::vector<Entity *> children;
+    // std::vector<std::unique_ptr<Node>> children;
+    std::vector<Node *> children;
     Transform *parent = nullptr;
-    Entity *parentPtr = nullptr;
+    Node *parentPtr = nullptr;
     bool isEnable = true;
     bool isStatic = false;
     ShapeType Shape;
-    static std::vector<Entity *> CubeEntities;
-    static std::vector<Entity *> SphereEntities;
+    static std::vector<Node *> CubeEntities;
+    static std::vector<Node *> SphereEntities;
     Material material;
 
-    Entity(Transform t = Transform(), ShapeType shape = POINT, Material material = Emerald) : transform(t), Shape(shape), material(material)
+    Node(Transform t = Transform(), ShapeType shape = POINT, Material material = Emerald) : transform(t), Shape(shape), material(material)
     {
     }
 
-    ~Entity()
+    ~Node()
     {
         if (parent)
         {
@@ -48,7 +48,7 @@ public:
         }
     }
 
-    void AddChild(Entity *child)
+    void AddChild(Node *child)
     {
         child->parent = &this->transform;
         child->parentPtr = this;
