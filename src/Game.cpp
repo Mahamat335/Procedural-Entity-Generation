@@ -92,6 +92,7 @@ bool Game::Update(float deltaTime)
     }
 
     RenderEntities(root, data.modelLoc);
+    return true;
 }
 
 void Game::End()

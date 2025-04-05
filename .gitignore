@@ -1,0 +1,8 @@
+*
+!.gitignore
+!header files/
+!header files/**
+!resources/
+!resources/**
+!src/
+!src/**
