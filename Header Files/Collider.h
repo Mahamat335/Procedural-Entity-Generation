@@ -14,12 +14,12 @@ class Collider
 {
 
 public:
-    glm::vec3 center;
-    std::vector<Collider *> collisions;
-    Node *parent;
-    Collider(Node *parent, glm::vec3 center);
-    virtual bool CheckForCollision(Collider *collision) = 0;
-    // virtual bool CheckForCollision(SphereCollider *collision) = 0;
+    glm::vec3 Center;
+    std::vector<Collider *> Collisions;
+    Node *Parent;
+    Collider(Node *parent);
+    // virtual bool CheckForCollision(Collider *collision) = 0;
+    //  virtual bool CheckForCollision(SphereCollider *collision) = 0;
     void OnCollisionEnter(Collider *collision);
     void OnCollisionExit(Collider *collision);
 };

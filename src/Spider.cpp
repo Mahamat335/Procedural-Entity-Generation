@@ -1,5 +1,6 @@
 #include <Spider.h>
 #include <ctime>
+#include <CollisionController.h>
 
 Spider::Spider(SpiderEntityData Data) : _spiderTransform(Data.EntityTransform), _legCount(Data.LegCount), _hipLocationAsDegree(Data.HipLocationAsDegree), _moveSpeed(Data.MoveSpeed), _bodySize(Data.BodySize), _upperLegSize(Data.UpperLegSize), _middleLegSize(Data.MiddleLegSize), _lowerLegSize(Data.LowerLegSize), _upperLegRotationAngle(Data.UpperLegRotationAngle), _middleLegRotationAngle(Data.MiddleLegRotationAngle), _lowerLegRotationAngle(Data.LowerLegRotationAngle)
 {
@@ -38,6 +39,7 @@ Spider::Spider(SpiderEntityData Data) : _spiderTransform(Data.EntityTransform), 
         _sLowerLegsPivot.at(i)->AddChild(_sLowerLegs.at(i));
     }
     _rotationDirections = std::vector<glm::vec2>(_sUpperLegsPivot.size(), glm::vec2(1.0f, 1.0f));
+    _spiderCollider = new SphereCollider(_spiderNode, _bodySize.z);
 }
 
 Node *Spider::GetNode()
@@ -85,9 +87,20 @@ void Spider::Move(float deltaTime)
         glm::vec3 direction = glm::vec3(sin(rotation), 0.0f, cos(rotation));
         _spiderNode->Move(_spiderNode->transform.pos + direction * _moveSpeed * deltaTime);
     }
+    CollisionController::Instance().UpdateCollider(_spiderCollider, _spiderTransform.pos);
 }
 
 void Spider::Patrol()
 {
     _moveSpeed *= -1.0f;
+}
+
+void Spider::SetCollider(SphereCollider *sphereCollider)
+{
+    _spiderCollider = sphereCollider;
+}
+
+SphereCollider *Spider::GetCollider()
+{
+    return _spiderCollider;
 }

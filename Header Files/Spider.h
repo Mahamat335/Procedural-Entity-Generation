@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <Node.h>
 #include <SpiderEntityData.h>
+#include <SphereCollider.h>
 
 class Spider
 {
@@ -12,6 +13,8 @@ public:
     Node *GetNode();
     void Move(float deltaTime);
     void Patrol();
+    void SetCollider(SphereCollider *sphereCollider);
+    SphereCollider *GetCollider();
 
 private:
     Transform _spiderTransform;
@@ -22,5 +25,6 @@ private:
     Node *_spiderNode, *_sBody;
     std::vector<Node *> _sUpperLegs, _sLowerLegs, _sMiddleLegs, _sMiddleLegsPivot, _sUpperLegsPivot, _sLowerLegsPivot;
     std::vector<glm::vec2> _rotationDirections;
+    SphereCollider *_spiderCollider;
 };
 #endif

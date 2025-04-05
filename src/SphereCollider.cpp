@@ -1,17 +1,12 @@
 #include <SphereCollider.h>
+#include <CollisionController.h>
 
-SphereCollider::SphereCollider(Node *parent, glm::vec3 center, float radius) : Collider(parent, center), radius(radius)
+SphereCollider::SphereCollider(Node *parent, float radius) : Collider(parent), Radius(radius)
 {
+    CollisionController::Instance().AddCollider(this);
 }
 
 bool SphereCollider::CheckForCollision(SphereCollider *collision)
 {
-    // if (typeid(collision) == typeid(this))
-    // {
-    return glm::distance(center, collision->center) < radius + collision->radius;
-    // }
-    // else
-    // {
-    // return glm::distance(glm::clamp(center - collision->center, -dynamic_cast<CubeCollider *>(collision)->halfSize, dynamic_cast<CubeCollider *>(collision)->halfSize) + collision->center, center) < radius;
-    //  }
+    return glm::distance(Center, collision->Center) < Radius + collision->Radius;
 }

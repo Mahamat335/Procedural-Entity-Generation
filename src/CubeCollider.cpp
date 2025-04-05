@@ -1,15 +1,15 @@
 #include <CubeCollider.h>
 
-CubeCollider::CubeCollider(Node *parent, glm::vec3 center, glm::vec3 size) : Collider(parent, center), size(size)
+CubeCollider::CubeCollider(Node *parent, glm::vec3 size) : Collider(parent), size(size)
 {
     halfSize = size *= 0.5f;
 }
 
 bool CubeCollider::CheckForCollision(CubeCollider *collision)
 {
-    bool collisionX = center.x + halfSize.x >= collision->center.x - collision->halfSize.x && collision->center.x + collision->halfSize.x >= center.x - halfSize.x;
-    bool collisionY = center.y + halfSize.y >= collision->center.y - collision->halfSize.y && collision->center.y + collision->halfSize.y >= center.y - halfSize.y;
-    bool collisionZ = center.z + halfSize.z >= collision->center.z - collision->halfSize.z && collision->center.z + collision->halfSize.z >= center.z - halfSize.z;
+    bool collisionX = Center.x + halfSize.x >= collision->Center.x - collision->halfSize.x && collision->Center.x + collision->halfSize.x >= Center.x - halfSize.x;
+    bool collisionY = Center.y + halfSize.y >= collision->Center.y - collision->halfSize.y && collision->Center.y + collision->halfSize.y >= Center.y - halfSize.y;
+    bool collisionZ = Center.z + halfSize.z >= collision->Center.z - collision->halfSize.z && collision->Center.z + collision->halfSize.z >= Center.z - halfSize.z;
     // std::cout << center.x << " " << halfSize.x << " " << collision->center.x << " " << collision->halfSize.x << std::endl;
     return collisionX && collisionY && collisionZ;
 }

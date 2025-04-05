@@ -5,6 +5,7 @@
 #include <ctime>
 #include <Spider.h>
 #include <SpiderEntityData.h>
+#include <CollisionController.h>
 
 Node root, area, spider, sBody, *sUpperLegs[6], *sLowerLegs[6], *sUpperLegsPivot[6], *sLowerLegsPivot[6];
 const glm::vec3 AreaSize(70.0f, 0.1f, 70.0f);
@@ -80,6 +81,14 @@ bool Game::Update(float deltaTime)
     for (Spider *spider : spiders)
     {
         spider->Move(deltaTime);
+    }
+
+    for (Spider *spider : spiders)
+    {
+        if (CollisionController::Instance().CheckForCollisions(spider->GetCollider()))
+        {
+            std::cout << "Collision detected after movement! \n";
+        }
     }
 
     RenderEntities(root, data.modelLoc);

@@ -1,19 +1,19 @@
 #include <Collider.h>
 
-Collider::Collider(Node *parent, glm::vec3 center) //: parent(parent), center(parent->transform.pos)
+Collider::Collider(Node *parent) : Parent(parent), Center(parent->transform.pos)
 {
 }
 
 void Collider::OnCollisionEnter(Collider *collision)
 {
-    collisions.emplace_back(collision);
+    Collisions.emplace_back(collision);
 }
 
 void Collider::OnCollisionExit(Collider *collision)
 {
-    auto it = std::find(collisions.begin(), collisions.end(), collision);
-    if (it != collisions.end())
+    auto it = std::find(Collisions.begin(), Collisions.end(), collision);
+    if (it != Collisions.end())
     {
-        collisions.erase(it);
+        Collisions.erase(it);
     }
 }
