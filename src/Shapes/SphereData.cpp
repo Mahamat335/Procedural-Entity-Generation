@@ -5,8 +5,10 @@ void SphereData::SetupData()
 {
     CurrentVAO = new VAO();
     CurrentVAO->Bind();
-    CurrentVBO = new VBO(GetVertices(), vertexCount * sizeof(float));
-    CurrentEBO = new EBO(GetIndices(), indexCount * sizeof(unsigned int));
+    float *vertices = GetVertices();
+    unsigned int *indices = GetIndices();
+    CurrentVBO = new VBO(vertices, vertexCount * sizeof(float));
+    CurrentEBO = new EBO(indices, indexCount * sizeof(unsigned int));
     CurrentVAO->LinkAttrib(*CurrentVBO, 0, 3, GL_FLOAT, 6 * sizeof(float), (void *)0);
     CurrentVAO->LinkAttrib(*CurrentVBO, 1, 3, GL_FLOAT, 6 * sizeof(float), (void *)(3 * sizeof(float)));
     CurrentVAO->Unbind();
@@ -31,18 +33,13 @@ void SphereData::DrawShape(unsigned int modelLoc, const GLfloat *value)
 
 float *SphereData::GetVertices()
 {
-    float *vertices = nullptr;
-
     float radius = 0.5f;
 
     // Calculate the number of vertices
     vertexCount = (detailLevel) * (detailLevel) * 6;
 
-    if (vertices == nullptr)
-    {
-        vertices = new float[vertexCount * 6]; // Position and Normal for each vertex
-    }
-
+    float *vertices = new float[vertexCount]; // Position and Normal for each vertex
+   
     int index = 0;
 
     // Iterate over latitude and longitude divisions
@@ -77,16 +74,11 @@ float *SphereData::GetVertices()
 
 unsigned int *SphereData::GetIndices()
 {
-    static unsigned int *indices = nullptr;
-
     // Calculate the number of indices for the sphere
     indexCount = (detailLevel - 1) * (detailLevel - 1) * 6; // 2 triangles per grid square
 
-    if (indices == nullptr)
-    {
-        indices = new unsigned int[indexCount];
-    }
-
+    unsigned int *indices = new unsigned int[indexCount];
+   
     int index = 0;
     for (int i = 0; i < detailLevel - 1; i++)
     {
