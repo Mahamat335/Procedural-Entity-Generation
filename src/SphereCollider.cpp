@@ -10,3 +10,8 @@ bool SphereCollider::CheckForCollision(SphereCollider *collision)
 {
     return glm::distance(Center, collision->Center) < Radius + collision->Radius;
 }
+
+void SphereCollider::Update()
+{
+    Center = Parent->transform.pos;
+}

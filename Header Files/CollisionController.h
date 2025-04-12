@@ -15,7 +15,7 @@ private:
     std::unordered_map<glm::ivec2, std::vector<SphereCollider *>> __hashGrid;
 
 public:
-    const float ChunkSize = 1.0f;
+    const float ChunkSize = 2.0f;
     glm::ivec2 GetChunkIndex(const glm::vec3 &position) const
     {
         return glm::ivec2(
@@ -36,21 +36,10 @@ public:
         colliders.erase(std::remove(colliders.begin(), colliders.end(), collider), colliders.end());
     }
 
-    void UpdateCollider(SphereCollider *collider, const glm::vec3 &newPosition)
+    void UpdateCollider(SphereCollider *collider)
     {
-        glm::ivec2 oldChunk = GetChunkIndex(collider->Center);
-        glm::ivec2 newChunk = GetChunkIndex(newPosition);
-
-        if (oldChunk != newChunk)
-        {
-            RemoveCollider(collider);
-            collider->Center = newPosition;
-            AddCollider(collider);
-        }
-        else
-        {
-            collider->Center = newPosition;
-        }
+        RemoveCollider(collider);
+        AddCollider(collider);
     }
 
     bool CheckForCollisions(SphereCollider *collider)

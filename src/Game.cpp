@@ -25,7 +25,7 @@ bool Game::Start()
 
     area = Node(Transform(glm::vec3(0.0f, -5.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), AreaSize), CUBE, Silver);
     root.AddChild(&area);
-    
+
     for (int i = 2; i < 10; i += 2)
     {
         for (int j = 2; j < 10; j += 2)
@@ -84,13 +84,13 @@ bool Game::Update(float deltaTime)
         spider->Move(deltaTime);
     }
 
-   // for (Spider *spider : spiders)
-   // {
-      //  if (CollisionController::Instance().CheckForCollisions(spider->GetCollider()))
-     //   {
-       //     std::cout << "Collision detected after movement! \n";
-     //   }
- //   }
+    for (Spider *spider : spiders)
+    {
+        if (CollisionController::Instance().CheckForCollisions(spider->GetCollider()))
+        {
+            std::cout << "Collision detected after movement! \n";
+        }
+    }
 
     RenderEntities(root, data.modelLoc);
     return true;

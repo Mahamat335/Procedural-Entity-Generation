@@ -10,6 +10,7 @@ public:
     float Radius;
     SphereCollider(Node *parent, float radius);
     bool CheckForCollision(SphereCollider *collision);
+    void Update();
 };
 
 #endif
