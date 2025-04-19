@@ -44,7 +44,7 @@ bool Game::Start()
                 Transform(glm::vec3(-35.0f, -5.0f, -35.0f) + glm::vec3(j * 6.0f, -bodyHeight, i * 6.0f), glm::vec3(0.0f, randomRotation, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f)), // EntityTransform
                 i,                                                                                                                                                            // LegCount
                 hipLocationAsDegree,                                                                                                                                          // HipLocationAsDegree
-                0.5f,                                                                                                                                                         // MoveSpeed
+                data.moveSpeed,                                                                                                                                               // MoveSpeed
                 bodySize,                                                                                                                                                     // BodySize
                 glm::vec3(0.05f, 1.25f, 0.05f) * (j / 4.0f),                                                                                                                  // UpperLegSize
                 glm::vec3(0.05f, 1.0f, 0.05f) * (j / 4.0f),                                                                                                                   // MiddleLegSize
@@ -81,6 +81,7 @@ bool Game::Update(float deltaTime)
     // spider movement
     for (Spider *spider : spiders)
     {
+        spider->SetMoveSpeed(data.moveSpeed);
         spider->Move(deltaTime);
     }
 

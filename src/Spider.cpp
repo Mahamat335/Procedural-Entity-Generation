@@ -105,3 +105,8 @@ SphereCollider *Spider::GetCollider()
 {
     return _spiderCollider;
 }
+
+void Spider::SetMoveSpeed(float moveSpeed)
+{
+    _moveSpeed = moveSpeed;
+}

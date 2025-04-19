@@ -21,12 +21,16 @@
 #include <ShapeType.h>
 #include <ShapeRenderer.h>
 #include <ShaderManager.h>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 void ChangePolygonMode();
+void ChangeCursorStatus(GLFWwindow *window);
 
 const unsigned int width = 1200;
 const unsigned int height = 1200;
@@ -85,6 +89,15 @@ int main()
 	Shader shaderProgram = *(ShaderManager::Instance().defaultShaderProgram);
 	ShapeRenderer::Instance().Setup();
 
+	// imgui
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO &io = ImGui::GetIO();
+	(void)io;
+	ImGui::StyleColorsDark();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 330");
+
 	float lastCheck = 0;
 
 	game.Start();
@@ -104,6 +117,17 @@ int main()
 
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// imgui
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+		if (!io.WantCaptureMouse)
+		{
+			// u can call processInput() here for disable inputs
+			// io.WantCaptureKeyboard is smt.
+		}
 
 		shaderProgram.use();
 
@@ -126,6 +150,15 @@ int main()
 
 		game.Update(deltaTime);
 
+		// imgui
+		ImGui::Begin("title?");
+		ImGui::Text("hi");
+		ImGui::SliderFloat("Move Speed: ", &game.data.moveSpeed, 0.0f, 1.0f);
+		ImGui::End();
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
@@ -135,6 +168,11 @@ int main()
 			std::cerr << "OpenGL error: " << err << std::endl;
 		} */
 	}
+
+	// imgui
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
 	game.End();
 	ShapeRenderer::Instance().Clear();
@@ -189,6 +227,11 @@ void processInput(GLFWwindow *window)
 	{
 		ChangePolygonMode();
 	}
+
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS)
+	{
+		ChangeCursorStatus(window);
+	}
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -233,8 +276,29 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 void ChangePolygonMode()
 {
 	if (game.data.polygonMode)
+	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
 	else
+	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+
 	game.data.polygonMode = !game.data.polygonMode;
+}
+
+void ChangeCursorStatus(GLFWwindow *window)
+{
+	if (game.data.isCursorEnabled)
+	{
+
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
+	else
+	{
+
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+
+	game.data.isCursorEnabled = !game.data.isCursorEnabled;
 }

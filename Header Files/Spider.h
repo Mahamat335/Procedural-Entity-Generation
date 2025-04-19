@@ -14,6 +14,7 @@ public:
     void Move(float deltaTime);
     void Patrol();
     void SetCollider(SphereCollider *sphereCollider);
+    void SetMoveSpeed(float movespeed);
     SphereCollider *GetCollider();
 
 private:

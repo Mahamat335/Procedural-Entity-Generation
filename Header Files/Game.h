@@ -18,7 +18,9 @@ class Game
         float playerAngularSpeed = 0.0f;
         float playerSpeed = 5.0f;
         bool polygonMode = false;
+        bool isCursorEnabled = false;
         unsigned int modelLoc;
+        float moveSpeed = 0.5f;
     };
 
 public:
