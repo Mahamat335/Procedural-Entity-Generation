@@ -87,6 +87,8 @@ int main()
 	// Textures
 
 	Shader shaderProgram = *(ShaderManager::Instance().defaultShaderProgram);
+	Shader shadowMapShaderProgram = *(ShaderManager::Instance().shadowMapShaderProgram);
+
 	ShapeRenderer::Instance().Setup();
 
 	// imgui
@@ -101,6 +103,33 @@ int main()
 	float lastCheck = 0;
 
 	game.Start();
+
+	// Shadow Calculations
+
+	unsigned int shadowMapFBO;
+	glGenFramebuffers(1, &shadowMapFBO);
+	unsigned int shadowMapWidth = 2048, shadowMapHeight = 2048;
+	unsigned int shadowMap;
+	glGenTextures(1, &shadowMap);
+	glBindTexture(GL_TEXTURE_2D, shadowMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	float clampColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, clampColor);
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glm::vec3 lightPos = glm::vec3(0.5f, 0.2f, 0.5f);
+	glm::mat4 orthogonalProjection = glm::ortho(-35.0f, 35.0f, -35.0f, 35.0f, 0.1f, 75.0f);
+	glm::mat4 lightView = glm::lookAt(20.0f * lightPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 lightProjection = orthogonalProjection * lightView;
+
 	while (!glfwWindowShouldClose(window))
 	{
 		float currentFrame = static_cast<float>(glfwGetTime());
@@ -129,6 +158,30 @@ int main()
 			// io.WantCaptureKeyboard is smt.
 		}
 
+		// Shadow
+
+		// render scene from light's point of view
+		shadowMapShaderProgram.use();
+		glUniformMatrix4fv(glGetUniformLocation(shadowMapShaderProgram.ID, "lightProjection"), 1, GL_FALSE, glm::value_ptr(lightProjection));
+
+		glViewport(0, 0, shadowMapWidth, shadowMapHeight);
+		glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
+		glClear(GL_DEPTH_BUFFER_BIT); /*
+		 glActiveTexture(GL_TEXTURE0);
+		 glBindTexture(GL_TEXTURE_2D, woodTexture); */
+		game.RenderEntities(glGetUniformLocation(shadowMapShaderProgram.ID, "model"), shadowMapShaderProgram);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		// reset viewport
+		glViewport(0, 0, width, height);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// we already enabled it: glEnable(GL_DEPTH_TEST);
+		/* glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
+		glClear(GL_DEPTH_BUFFER_BIT); */
+
+		// Camera Rendering
+
 		shaderProgram.use();
 
 		glm::mat4 view = camera.GetViewMatrix();
@@ -145,16 +198,29 @@ int main()
 		// note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
+		// shadow
+
+		/* glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "lightProjection"), 1, GL_FALSE, glm::value_ptr(lightProjection));
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, shadowMap);
+		shaderProgram.setInt("shadowMap", 0); */
+
 		unsigned int modelLoc = glGetUniformLocation(shaderProgram.ID, "model");
 		game.data.modelLoc = modelLoc;
 
 		game.Update(deltaTime);
 
+		// shadow clear
+		// glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 		// imgui
-		ImGui::Begin("title?");
-		ImGui::Text("hi");
-		ImGui::SliderFloat("Move Speed: ", &game.data.moveSpeed, 0.0f, 1.0f);
-		ImGui::End();
+		if (game.data.isCursorEnabled)
+		{
+			ImGui::Begin("title?");
+			ImGui::Text("hi");
+			ImGui::SliderFloat("Move Speed: ", &game.data.moveSpeed, 0.0f, 1.0f);
+			ImGui::End();
+		}
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -163,10 +229,11 @@ int main()
 		glfwPollEvents();
 
 		// error catching
-		/* GLenum err= glGetError();
-		if (err != GL_NO_ERROR) {
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR)
+		{
 			std::cerr << "OpenGL error: " << err << std::endl;
-		} */
+		}
 	}
 
 	// imgui

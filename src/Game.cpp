@@ -62,7 +62,7 @@ bool Game::Start()
 
     // Light Calculations
     DirectionalLight directionalLight(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(-0.5f, -0.2f, -0.5f));
-    PointLight pointLight(0, glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+    // PointLight pointLight(0, glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
     return true;
 }
@@ -82,7 +82,7 @@ bool Game::Update(float deltaTime)
     for (Spider *spider : spiders)
     {
         spider->SetMoveSpeed(data.moveSpeed);
-        spider->Move(deltaTime);
+        // spider->Move(deltaTime);
     }
 
     for (Spider *spider : spiders)
@@ -93,7 +93,7 @@ bool Game::Update(float deltaTime)
         }
     }
 
-    RenderEntities(root, data.modelLoc);
+    RenderEntities(data.modelLoc, *(ShaderManager::Instance().defaultShaderProgram));
     return true;
 }
 
@@ -102,7 +102,7 @@ void Game::End()
     // Code to execute once at the end
 }
 
-void Game::RenderEntities(Node root, unsigned int modelLoc)
+void Game::RenderEntities(unsigned int modelLoc, Shader shaderProgram)
 {
     std::stack<Node *> stack;
     for (auto &child : root.children)
@@ -117,11 +117,11 @@ void Game::RenderEntities(Node root, unsigned int modelLoc)
         stack.pop();
         if (current->Shape == CUBE)
         {
-            current->DrawMesh(modelLoc);
+            current->DrawMesh(modelLoc, shaderProgram);
         }
         else
         {
-            current->DrawMesh(modelLoc);
+            current->DrawMesh(modelLoc, shaderProgram);
         }
         for (auto &child : current->children)
         {

@@ -10,9 +10,11 @@ class ShaderManager : public Singleton<ShaderManager>
 
 public:
     Shader *defaultShaderProgram;
+    Shader *shadowMapShaderProgram;
     ShaderManager()
     {
         defaultShaderProgram = new Shader("resources/shaders/default.vert", "resources/shaders/default.frag");
+        shadowMapShaderProgram = new Shader("resources/shaders/shadowMap.vert", "resources/shaders/shadowMap.frag");
     };
 };
 

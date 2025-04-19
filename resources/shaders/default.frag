@@ -12,9 +12,11 @@ out vec4 FragColor;
 in vec3 Normal;  
 in vec3 FragPos;  
 in vec3 Color;
+in vec4 fragPosLight;
 
 uniform Material material;
 uniform vec3 viewPos;
+uniform sampler2D shadowMap;
 
 struct PointLight {    
     vec3 position;
@@ -115,10 +117,25 @@ vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir
         spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess * 128);
     }
 
+    float shadow = 0.0f;
+    vec3 lightCoords = fragPosLight.xyz / fragPosLight.w;
+    if (lightCoords.z <= 1.0f)
+    {
+        lightCoords = (lightCoords + 1.0f) / 2.0f;
+
+        float closestDepth = texture(shadowMap, lightCoords.xy).r;
+        float currentDepth = lightCoords.z;
+
+        if (currentDepth > closestDepth)
+        {
+            shadow = 1.0f;
+        }
+    }
+
     // combine results
     vec3 ambient  = light.color * light.ambient * ambientColor;
-    vec3 diffuse  = light.color * light.diffuse * diff * diffuseColor;
-    vec3 specular = light.color * light.specular * spec * specularColor;
+    vec3 diffuse  = light.color * light.diffuse * diff * diffuseColor * (1.0f - shadow);
+    vec3 specular = light.color * light.specular * spec * specularColor * (1.0f - shadow);
     return (ambient + diffuse + specular);
 }  
 

@@ -69,9 +69,9 @@ public:
         }
     }
 
-    void DrawMesh(unsigned int modelLoc)
+    void DrawMesh(unsigned int modelLoc, Shader shaderProgram = *(ShaderManager::Instance().defaultShaderProgram))
     {
-        ShapeRenderer::Instance().Draw(Shape, modelLoc, glm::value_ptr(transform.modelMatrix), material);
+        ShapeRenderer::Instance().Draw(Shape, modelLoc, glm::value_ptr(transform.modelMatrix), material, shaderProgram);
     }
 
     void Move(glm::vec3 newPosition)

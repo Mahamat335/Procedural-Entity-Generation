@@ -29,7 +29,7 @@ public:
     bool Start();
     bool Update(float deltaTime);
     void End();
-    void RenderEntities(Node root, unsigned int modelLoc);
+    void RenderEntities(unsigned int modelLoc, Shader shaderProgram);
 };
 
 #endif // GAME_H
