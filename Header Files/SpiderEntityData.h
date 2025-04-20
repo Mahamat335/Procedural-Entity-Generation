@@ -1,5 +1,5 @@
-#ifndef ENTITY_DATA_H
-#define ENTITY_DATA_H
+#ifndef SPIDER_ENTITY_DATA_H
+#define SPIDER_ENTITY_DATA_H
 
 #include <Transform.h>
 #include <glm/glm.hpp>

@@ -20,7 +20,7 @@ public:
 private:
     Transform _spiderTransform;
     int _legCount;
-    float _hipLocationAsDegree, _moveSpeed;
+    float _hipLocationAsDegree, _moveSpeed, _patrolDirection;
     glm::vec3 _bodySize, _upperLegSize, _middleLegSize, _lowerLegSize, _upperLegRotationAngle, _middleLegRotationAngle, _lowerLegRotationAngle;
 
     Node *_spiderNode, *_sBody;

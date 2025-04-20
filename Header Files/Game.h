@@ -9,6 +9,7 @@
 #include <Transform.h>
 #include <glm/glm.hpp>
 #include <Collider.h>
+#include <SpiderGenerationData.h>
 
 class Game
 {
@@ -21,6 +22,21 @@ class Game
         bool isCursorEnabled = false;
         unsigned int modelLoc;
         float moveSpeed = 0.5f;
+        SpiderGenerationData spiderGenerationData{
+            16,
+            2,
+            10,
+            0.2f,
+            0.8f,
+            0.0f,
+            3.0f,
+            0.0f,
+            3.0f,
+            0.0f,
+            3.0f,
+            0.0f,
+            3.0f,
+        };
     };
 
 public:
@@ -30,6 +46,7 @@ public:
     bool Update(float deltaTime);
     void End();
     void RenderEntities(unsigned int modelLoc, Shader shaderProgram);
+    void InitializeSpiders();
 };
 
 #endif // GAME_H

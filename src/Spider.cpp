@@ -6,6 +6,7 @@ Spider::Spider(SpiderEntityData Data) : _spiderTransform(Data.EntityTransform), 
 {
     _spiderNode = new Node(_spiderTransform);
     _sBody = new Node(Transform(glm::vec3(), glm::vec3(), _bodySize), SPHERE, Obsidian);
+    _patrolDirection = 1.0f;
 
     _spiderNode->AddChild(_sBody);
 
@@ -85,7 +86,7 @@ void Spider::Move(float deltaTime)
                       glm::vec3(0.0f, 0.0f, _rotationDirections[i][0] * RotationSpeed * deltaTime));
         float rotation = _spiderTransform.eulerRot.y * glm::pi<float>() / 180.0f;
         glm::vec3 direction = glm::vec3(sin(rotation), 0.0f, cos(rotation));
-        _spiderNode->Move(_spiderNode->transform.pos + direction * _moveSpeed * deltaTime);
+        _spiderNode->Move(_spiderNode->transform.pos + direction * _moveSpeed * _patrolDirection * deltaTime);
     }
     _spiderCollider->Update();
     CollisionController::Instance().UpdateCollider(_spiderCollider);
@@ -93,7 +94,7 @@ void Spider::Move(float deltaTime)
 
 void Spider::Patrol()
 {
-    _moveSpeed *= -1.0f;
+    _patrolDirection *= -1.0f;
 }
 
 void Spider::SetCollider(SphereCollider *sphereCollider)

@@ -117,8 +117,8 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	float clampColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, clampColor);
+	float borderColor[] = {1.0, 1.0, 1.0, 1.0};
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 	glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMap, 0);
 	glDrawBuffer(GL_NONE);
@@ -166,10 +166,9 @@ int main()
 
 		glViewport(0, 0, shadowMapWidth, shadowMapHeight);
 		glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
-		glClear(GL_DEPTH_BUFFER_BIT); /*
-		 glActiveTexture(GL_TEXTURE0);
-		 glBindTexture(GL_TEXTURE_2D, woodTexture); */
-		game.RenderEntities(glGetUniformLocation(shadowMapShaderProgram.ID, "model"), shadowMapShaderProgram);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		unsigned int depthModel = glGetUniformLocation(shadowMapShaderProgram.ID, "model");
+		game.RenderEntities(depthModel, shadowMapShaderProgram);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		// reset viewport
@@ -200,10 +199,10 @@ int main()
 
 		// shadow
 
-		/* glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "lightProjection"), 1, GL_FALSE, glm::value_ptr(lightProjection));
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "lightProjection"), 1, GL_FALSE, glm::value_ptr(lightProjection));
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, shadowMap);
-		shaderProgram.setInt("shadowMap", 0); */
+		shaderProgram.setInt("shadowMap", 0);
 
 		unsigned int modelLoc = glGetUniformLocation(shaderProgram.ID, "model");
 		game.data.modelLoc = modelLoc;
@@ -219,6 +218,27 @@ int main()
 			ImGui::Begin("title?");
 			ImGui::Text("hi");
 			ImGui::SliderFloat("Move Speed: ", &game.data.moveSpeed, 0.0f, 1.0f);
+			if (ImGui::Checkbox("Polygon Mode", &game.data.polygonMode))
+			{
+				ChangePolygonMode();
+			}
+			ImGui::InputInt("Spider Count", &game.data.spiderGenerationData.SpiderCount);
+			ImGui::InputInt("Min Leg Count", &game.data.spiderGenerationData.LegCountMin);
+			ImGui::InputInt("Max Leg Count", &game.data.spiderGenerationData.LegCountMax);
+			ImGui::InputFloat("Min Move Speed", &game.data.spiderGenerationData.MoveSpeedMin);
+			ImGui::InputFloat("Max Move Speed", &game.data.spiderGenerationData.MoveSpeedMax);
+			ImGui::InputFloat("Min Leg Scale", &game.data.spiderGenerationData.LegScaleMin);
+			ImGui::InputFloat("Max Leg Scale", &game.data.spiderGenerationData.LegScaleMax);
+			ImGui::InputFloat("Min Upper Leg Scale", &game.data.spiderGenerationData.UpperLegSizeScaleMin);
+			ImGui::InputFloat("Max Upper Leg Scale", &game.data.spiderGenerationData.UpperLegSizeScaleMax);
+			ImGui::InputFloat("Min Middle Leg Scale", &game.data.spiderGenerationData.MiddleLegSizeScaleMin);
+			ImGui::InputFloat("Max Middle Leg Scale", &game.data.spiderGenerationData.MiddleLegSizeScaleMax);
+			ImGui::InputFloat("Min Lower Leg Scale", &game.data.spiderGenerationData.LowerLegSizeScaleMin);
+			ImGui::InputFloat("Max Lower Leg Scale", &game.data.spiderGenerationData.LowerLegSizeScaleMax);
+			if (ImGui::Button("Initialize Spiders"))
+			{
+				game.InitializeSpiders();
+			}
 			ImGui::End();
 		}
 
@@ -244,6 +264,7 @@ int main()
 	game.End();
 	ShapeRenderer::Instance().Clear();
 	shaderProgram.deleteProgram();
+	shadowMapShaderProgram.deleteProgram();
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;
@@ -350,8 +371,6 @@ void ChangePolygonMode()
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
-
-	game.data.polygonMode = !game.data.polygonMode;
 }
 
 void ChangeCursorStatus(GLFWwindow *window)

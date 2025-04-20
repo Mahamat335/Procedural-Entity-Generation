@@ -92,6 +92,8 @@ void main()
     
     FragColor = vec4(result, 1.0f);
     FragColor.rgb = pow(FragColor.rgb, vec3(gamma));
+    //vec3 lightCoords = fragPosLight.xyz / fragPosLight.w;
+    //FragColor = texture(shadowMap, lightCoords.xy);
 }
 
 vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir)
