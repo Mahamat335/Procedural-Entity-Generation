@@ -21,5 +21,5 @@ void main()
     //FragPos = objectPos * aPos;
     Normal = mat3(transpose(inverse(model))) * aNormal; 
     Color = vec3(1.0, 0.5, 0.31);
-    fragPosLight = lightProjection * gl_Position;
+    fragPosLight = lightProjection * model * vec4(aPos, 1.0);
 }

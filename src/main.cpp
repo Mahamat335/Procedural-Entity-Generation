@@ -87,7 +87,7 @@ int main()
 	// Textures
 
 	Shader shaderProgram = *(ShaderManager::Instance().defaultShaderProgram);
-	Shader shadowMapShaderProgram = *(ShaderManager::Instance().shadowMapShaderProgram);
+	Shader shadowMapProgram = *(ShaderManager::Instance().shadowMapShaderProgram);
 
 	ShapeRenderer::Instance().Setup();
 
@@ -103,32 +103,38 @@ int main()
 	float lastCheck = 0;
 
 	game.Start();
+	game.InitializeSpiders();
 
 	// Shadow Calculations
 
-	unsigned int shadowMapFBO;
-	glGenFramebuffers(1, &shadowMapFBO);
-	unsigned int shadowMapWidth = 2048, shadowMapHeight = 2048;
-	unsigned int shadowMap;
-	glGenTextures(1, &shadowMap);
-	glBindTexture(GL_TEXTURE_2D, shadowMap);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowMapWidth, shadowMapHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	// Create Frame Buffer Object
+	unsigned int FBO;
+	glGenFramebuffers(1, &FBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
+	// Create Framebuffer Texture
+	unsigned int framebufferTexture;
+	glGenTextures(1, &framebufferTexture);
+	glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	float borderColor[] = {1.0, 1.0, 1.0, 1.0};
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-	glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMap, 0);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // Prevents edge bleeding
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Prevents edge bleeding
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, framebufferTexture, 0);
+	glDrawBuffer(GL_NONE); // No color buffer is drawn to
+	glReadBuffer(GL_NONE); // No color buffer is drawn to
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	glm::vec3 lightPos = glm::vec3(0.5f, 0.2f, 0.5f);
-	glm::mat4 orthogonalProjection = glm::ortho(-35.0f, 35.0f, -35.0f, 35.0f, 0.1f, 75.0f);
+	glm::vec3 lightPos = glm::vec3(0.5f, 0.5f, 0.5f);
+	// Matrices needed for the light's perspective
+	glm::mat4 orthgonalProjection = glm::ortho(-35.0f, 35.0f, -35.0f, 35.0f, 0.1f, 75.0f);
 	glm::mat4 lightView = glm::lookAt(20.0f * lightPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	glm::mat4 lightProjection = orthogonalProjection * lightView;
+	glm::mat4 lightProjection = orthgonalProjection * lightView;
+
+	shadowMapProgram.use();
+	glUniformMatrix4fv(glGetUniformLocation(shadowMapProgram.ID, "lightProjection"), 1, GL_FALSE, glm::value_ptr(lightProjection));
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -143,6 +149,20 @@ int main()
 			lastCheck = 0;
 		}
 		lastCheck += deltaTime;
+
+		// Depth testing needed for Shadow Map
+		glEnable(GL_DEPTH_TEST);
+
+		// Preparations for the Shadow Map
+		glViewport(0, 0, width, height);
+		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		// Draw scene for shadow map
+		unsigned int shadowModelLoc = glGetUniformLocation(shadowMapProgram.ID, "model");
+		game.RenderEntities(shadowModelLoc, shadowMapProgram);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -159,17 +179,6 @@ int main()
 		}
 
 		// Shadow
-
-		// render scene from light's point of view
-		shadowMapShaderProgram.use();
-		glUniformMatrix4fv(glGetUniformLocation(shadowMapShaderProgram.ID, "lightProjection"), 1, GL_FALSE, glm::value_ptr(lightProjection));
-
-		glViewport(0, 0, shadowMapWidth, shadowMapHeight);
-		glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
-		glClear(GL_DEPTH_BUFFER_BIT);
-		unsigned int depthModel = glGetUniformLocation(shadowMapShaderProgram.ID, "model");
-		game.RenderEntities(depthModel, shadowMapShaderProgram);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		// reset viewport
 		glViewport(0, 0, width, height);
@@ -198,11 +207,10 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 		// shadow
-
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "lightProjection"), 1, GL_FALSE, glm::value_ptr(lightProjection));
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, shadowMap);
-		shaderProgram.setInt("shadowMap", 0);
+		glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+		glUniform1i(glGetUniformLocation(shaderProgram.ID, "shadowMap"), 0);
 
 		unsigned int modelLoc = glGetUniformLocation(shaderProgram.ID, "model");
 		game.data.modelLoc = modelLoc;
@@ -264,7 +272,7 @@ int main()
 	game.End();
 	ShapeRenderer::Instance().Clear();
 	shaderProgram.deleteProgram();
-	shadowMapShaderProgram.deleteProgram();
+	shadowMapProgram.deleteProgram();
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;

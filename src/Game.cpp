@@ -31,7 +31,7 @@ bool Game::Start()
     root.AddChild(spidersParent);
 
     // Light Calculations
-    DirectionalLight directionalLight(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(-0.5f, -0.2f, -0.5f));
+    DirectionalLight directionalLight(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(-0.5f, -0.5f, -0.5f));
     // PointLight pointLight(0, glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
     return true;
@@ -52,7 +52,7 @@ bool Game::Update(float deltaTime)
     for (Spider *spider : spiders)
     {
         spider->SetMoveSpeed(data.moveSpeed);
-        spider->Move(deltaTime);
+        // spider->Move(deltaTime);
     }
 
     for (Spider *spider : spiders)
