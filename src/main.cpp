@@ -225,18 +225,19 @@ int main()
 		{
 			ImGui::Begin("title?");
 			ImGui::Text("hi");
-			ImGui::SliderFloat("Move Speed: ", &game.data.moveSpeed, 0.0f, 1.0f);
 			if (ImGui::Checkbox("Polygon Mode", &game.data.polygonMode))
 			{
 				ChangePolygonMode();
+			}
+			if (ImGui::Checkbox("Spider Movement", &game.data.areSpidersMoving))
+			{
+				game.data.areSpidersMoving = !game.data.areSpidersMoving;
 			}
 			ImGui::InputInt("Spider Count", &game.data.spiderGenerationData.SpiderCount);
 			ImGui::InputInt("Min Leg Count", &game.data.spiderGenerationData.LegCountMin);
 			ImGui::InputInt("Max Leg Count", &game.data.spiderGenerationData.LegCountMax);
 			ImGui::InputFloat("Min Move Speed", &game.data.spiderGenerationData.MoveSpeedMin);
 			ImGui::InputFloat("Max Move Speed", &game.data.spiderGenerationData.MoveSpeedMax);
-			ImGui::InputFloat("Min Leg Scale", &game.data.spiderGenerationData.LegScaleMin);
-			ImGui::InputFloat("Max Leg Scale", &game.data.spiderGenerationData.LegScaleMax);
 			ImGui::InputFloat("Min Upper Leg Scale", &game.data.spiderGenerationData.UpperLegSizeScaleMin);
 			ImGui::InputFloat("Max Upper Leg Scale", &game.data.spiderGenerationData.UpperLegSizeScaleMax);
 			ImGui::InputFloat("Min Middle Leg Scale", &game.data.spiderGenerationData.MiddleLegSizeScaleMin);
@@ -299,30 +300,6 @@ void processInput(GLFWwindow *window)
 		camera.SetSpeed(camera.MovementSpeed + 0.1f);
 	if (glfwGetKey(window, GLFW_KEY_SLASH) == GLFW_PRESS)
 		camera.SetSpeed();
-
-	game.data.playerVel = glm::vec3(0.0f, 0.0f, 0.0f);
-	game.data.playerAngularSpeed = 0;
-	if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS)
-		game.data.playerVel.y = game.data.playerSpeed * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
-		game.data.playerVel.y = -game.data.playerSpeed * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
-		game.data.playerVel.x = game.data.playerSpeed * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS)
-		game.data.playerVel.x = -game.data.playerSpeed * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
-		game.data.playerVel.z = game.data.playerSpeed * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)
-		game.data.playerVel.z = -game.data.playerSpeed * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS)
-		game.data.playerAngularSpeed = 1.0f;
-	if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
-		game.data.playerAngularSpeed = -1.0f;
-
-	if ((glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) && (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS))
-	{
-		ChangePolygonMode();
-	}
 
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS)
 	{

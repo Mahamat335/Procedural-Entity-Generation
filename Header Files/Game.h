@@ -15,26 +15,21 @@ class Game
 {
     struct GameData
     {
-        glm::vec3 playerVel;
-        float playerAngularSpeed = 0.0f;
-        float playerSpeed = 5.0f;
         bool polygonMode = false;
         bool isCursorEnabled = false;
         unsigned int modelLoc;
-        float moveSpeed = 0.5f;
+        bool areSpidersMoving = true;
         SpiderGenerationData spiderGenerationData{
             16,
             2,
             10,
             0.2f,
             0.8f,
-            0.0f,
+            0.25f,
             3.0f,
-            0.0f,
+            0.25f,
             3.0f,
-            0.0f,
-            3.0f,
-            0.0f,
+            0.25f,
             3.0f,
         };
     };

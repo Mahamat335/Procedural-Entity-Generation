@@ -51,17 +51,19 @@ bool Game::Update(float deltaTime)
     // spider movement
     for (Spider *spider : spiders)
     {
-        spider->SetMoveSpeed(data.moveSpeed);
-        // spider->Move(deltaTime);
+        if (data.areSpidersMoving)
+        {
+            spider->Move(deltaTime);
+        }
     }
 
-    for (Spider *spider : spiders)
+    /* for (Spider *spider : spiders)
     {
         if (CollisionController::Instance().CheckForCollisions(spider->GetCollider()))
         {
             std::cout << "Collision detected after movement! \n";
         }
-    }
+    } */
 
     RenderEntities(data.modelLoc, *(ShaderManager::Instance().defaultShaderProgram));
     return true;
@@ -106,7 +108,7 @@ void Game::InitializeSpiders()
     // Clear Spiders
 
     spiders.clear();
-    spidersParent->Destroy();
+    spidersParent->Destroy(); // TODO check if u can destroy a derivered object. I wanna store this in stack
     spidersParent = new Node();
     root.AddChild(spidersParent);
 
@@ -115,28 +117,43 @@ void Game::InitializeSpiders()
     for (int i = 0; i < data.spiderGenerationData.SpiderCount; i++)
     {
         float deg2rad = glm::pi<float>() / 180.0f;
-        glm::vec3 zRotationAngles(60.0f, 60.0f, 60.0f),
-            yLegSizes(glm::vec3(1.25f, 1.0f, 0.5f) * glm::linearRand(data.spiderGenerationData.LegScaleMin, data.spiderGenerationData.LegScaleMax));
-        float a = zRotationAngles.r, b = zRotationAngles.g, c = zRotationAngles.b;
-
-        float bodyHeight = cos(a * deg2rad) * yLegSizes.r + cos((a + b) * deg2rad) * yLegSizes.g + cos((a + b + c) * deg2rad) * yLegSizes.b;
-        float randomRotation = (rand() % 360) - 180;
-        float hipLocationAsDegree = 30.0f;
+        glm::vec3 zRotationAngles(60.0f, 60.0f, 60.0f);
         glm::vec3 bodySize = glm::vec3(0.8f, 0.4f, 1.0f);
+        float a = zRotationAngles.r, b = zRotationAngles.g, c = zRotationAngles.b;
+        glm::vec3 upperLegSize, middleLegSize, lowerLegSize;
+        float hipLocationAsDegree = 30.0f, bodyHeight;
+
+        while (true)
+        {
+            upperLegSize = glm::vec3(0.05f, 1.25f, 0.05f) *
+                           glm::linearRand(data.spiderGenerationData.UpperLegSizeScaleMin, data.spiderGenerationData.UpperLegSizeScaleMax); // UpperLegSize
+            middleLegSize = glm::vec3(0.05f, 1.0f, 0.05f) *
+                            glm::linearRand(data.spiderGenerationData.MiddleLegSizeScaleMin, data.spiderGenerationData.MiddleLegSizeScaleMax); // MiddleLegSize
+            lowerLegSize = glm::vec3(0.05f, 0.5f, 0.05f) *
+                           glm::linearRand(data.spiderGenerationData.LowerLegSizeScaleMin, data.spiderGenerationData.LowerLegSizeScaleMax); // LowerLegSize
+            bodyHeight = cos(a * deg2rad) * upperLegSize.y + cos((a + b) * deg2rad) * middleLegSize.y + cos((a + b + c) * deg2rad) * lowerLegSize.y;
+            if (bodyHeight + bodySize.y * 0.5f < 0.0f)
+            {
+                bodyHeight = bodySize.y * sin(hipLocationAsDegree * deg2rad) * 0.5f - bodyHeight;
+                break;
+            }
+        }
+
         bodyHeight -= bodySize.y * sin(hipLocationAsDegree * deg2rad) * 0.5f;
 
+        float randomRotation = (rand() % 360) - 180;
         SpiderEntityData spiderData{
-            Transform(glm::vec3(-AreaSize.x / 2.0f, -5.0f, -AreaSize.z / 2.0f) + glm::vec3(glm::linearRand(0.0f, AreaSize.x), -bodyHeight, glm::linearRand(0.0f, AreaSize.z)), glm::vec3(0.0f, randomRotation, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f)), // EntityTransform
-            glm::linearRand(data.spiderGenerationData.LegCountMin, data.spiderGenerationData.LegCountMax),                                                                                                                                          // LegCount
-            hipLocationAsDegree,                                                                                                                                                                                                                    // HipLocationAsDegree
-            glm::linearRand(data.spiderGenerationData.MoveSpeedMin, data.spiderGenerationData.MoveSpeedMax),                                                                                                                                        // MoveSpeed
-            bodySize,                                                                                                                                                                                                                               // BodySize
-            glm::vec3(0.05f, 1.25f, 0.05f) * glm::linearRand(data.spiderGenerationData.UpperLegSizeScaleMin, data.spiderGenerationData.UpperLegSizeScaleMax),                                                                                       // UpperLegSize
-            glm::vec3(0.05f, 1.0f, 0.05f) * glm::linearRand(data.spiderGenerationData.MiddleLegSizeScaleMin, data.spiderGenerationData.MiddleLegSizeScaleMax),                                                                                      // MiddleLegSize
-            glm::vec3(0.05f, 0.5f, 0.05f) * glm::linearRand(data.spiderGenerationData.LowerLegSizeScaleMin, data.spiderGenerationData.LowerLegSizeScaleMax),                                                                                        // LowerLegSize
-            glm::vec3(0.0f, -5.0f, zRotationAngles.r),                                                                                                                                                                                              // UpperLegRotationAngle
-            glm::vec3(0.0f, 0.0f, zRotationAngles.g),                                                                                                                                                                                               // MiddleLegRotationAngle
-            glm::vec3(0.0f, 0.0f, zRotationAngles.b),                                                                                                                                                                                               // LowerLegRotationAngle
+            Transform(glm::vec3(-AreaSize.x / 2.0f, -5.0f, -AreaSize.z / 2.0f) + glm::vec3(glm::linearRand(0.0f, AreaSize.x), bodyHeight, glm::linearRand(0.0f, AreaSize.z)), glm::vec3(0.0f, randomRotation, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f)), // EntityTransform
+            glm::linearRand(data.spiderGenerationData.LegCountMin, data.spiderGenerationData.LegCountMax),                                                                                                                                         // LegCount
+            hipLocationAsDegree,                                                                                                                                                                                                                   // HipLocationAsDegree
+            glm::linearRand(data.spiderGenerationData.MoveSpeedMin, data.spiderGenerationData.MoveSpeedMax),                                                                                                                                       // MoveSpeed
+            bodySize,                                                                                                                                                                                                                              // BodySize
+            upperLegSize,                                                                                                                                                                                                                          // UpperLegSize
+            middleLegSize,                                                                                                                                                                                                                         // MiddleLegSize
+            lowerLegSize,                                                                                                                                                                                                                          // LowerLegSize
+            glm::vec3(0.0f, -5.0f, zRotationAngles.r),                                                                                                                                                                                             // UpperLegRotationAngle
+            glm::vec3(0.0f, 0.0f, zRotationAngles.g),                                                                                                                                                                                              // MiddleLegRotationAngle
+            glm::vec3(0.0f, 0.0f, zRotationAngles.b),                                                                                                                                                                                              // LowerLegRotationAngle
         };
 
         Spider *spider = new Spider(spiderData);
