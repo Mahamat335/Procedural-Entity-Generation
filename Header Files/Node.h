@@ -38,14 +38,24 @@ public:
     {
         if (parent)
         {
-            auto it = std::find(parentPtr->children.begin(), parentPtr->children.end(), this);
-            if (it != parentPtr->children.end())
+            while (children.empty() == false)
             {
-                parentPtr->children.erase(it);
-            }
-            for (auto *child : children)
+                auto *child = children.back();
+                children.pop_back();
                 delete child;
+            }
         }
+    }
+
+    void Destroy()
+    {
+        auto it = std::find(parentPtr->children.begin(), parentPtr->children.end(), this);
+        if (it != parentPtr->children.end())
+        {
+            parentPtr->children.erase(it);
+        }
+
+        delete this;
     }
 
     void AddChild(Node *child)

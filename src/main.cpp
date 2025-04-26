@@ -387,4 +387,5 @@ void ChangeCursorStatus(GLFWwindow *window)
 	}
 
 	game.data.isCursorEnabled = !game.data.isCursorEnabled;
+	camera.CameraLock = !camera.CameraLock;
 }
