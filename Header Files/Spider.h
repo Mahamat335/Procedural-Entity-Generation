@@ -12,10 +12,10 @@ public:
     Spider(SpiderEntityData Data);
     Node *GetNode();
     void Move(float deltaTime);
-    void Patrol();
     void SetCollider(SphereCollider *sphereCollider);
     void SetMoveSpeed(float movespeed);
     SphereCollider *GetCollider();
+    void PickNewTarget();
 
 private:
     Transform _spiderTransform;
@@ -27,5 +27,8 @@ private:
     std::vector<Node *> _sUpperLegs, _sLowerLegs, _sMiddleLegs, _sMiddleLegsPivot, _sUpperLegsPivot, _sLowerLegsPivot;
     std::vector<glm::vec2> _rotationDirections;
     SphereCollider *_spiderCollider;
+    glm::vec2 _patrolAreaMin;
+    glm::vec2 _patrolAreaMax;
+    glm::vec3 _targetPosition;
 };
 #endif

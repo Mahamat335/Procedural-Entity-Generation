@@ -20,6 +20,7 @@ public:
     Node *Parent;
     int ID;
     Collider(Node *parent);
+    ~Collider();
     // virtual bool CheckForCollision(Collider *collision) = 0;
     //  virtual bool CheckForCollision(SphereCollider *collision) = 0;
     void OnCollisionEnter(Collider *other);

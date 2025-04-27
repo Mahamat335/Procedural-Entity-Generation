@@ -13,8 +13,6 @@ const glm::vec3 AreaSize(70.0f, 0.1f, 70.0f);
 Game::GameData Game::data = {};
 const int LegCount = 6;
 std::vector<Spider *> spiders;
-float patrolTimer = 0.0f;
-float patrolTime = 4.0f;
 
 Game::Game()
 {
@@ -39,15 +37,6 @@ bool Game::Start()
 
 bool Game::Update(float deltaTime)
 {
-    if (patrolTimer > patrolTime)
-    {
-        for (Spider *spider : spiders)
-        {
-            spider->Patrol();
-        }
-        patrolTimer = 0.0f;
-    }
-    patrolTimer += deltaTime;
     // spider movement
     for (Spider *spider : spiders)
     {
@@ -151,6 +140,8 @@ void Game::InitializeSpiders()
             glm::vec3(0.0f, -5.0f, zRotationAngles.r),                                                                                                                                                                                             // UpperLegRotationAngle
             glm::vec3(0.0f, 0.0f, zRotationAngles.g),                                                                                                                                                                                              // MiddleLegRotationAngle
             glm::vec3(0.0f, 0.0f, zRotationAngles.b),                                                                                                                                                                                              // LowerLegRotationAngle
+            glm::vec2(-AreaSize.x / 2.0f, -AreaSize.z / 2.0f),                                                                                                                                                                                     // patrolAreaMin
+            glm::vec2(AreaSize.x / 2.0f, AreaSize.z / 2.0f)                                                                                                                                                                                        // patrolAreaMax
         };
 
         Spider *spider = new Spider(spiderData);
