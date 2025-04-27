@@ -42,11 +42,10 @@ public:
         AddCollider(collider);
     }
 
-    bool CheckForCollisions(SphereCollider *collider)
+    void CheckForCollisions(SphereCollider *collider)
     {
         glm::ivec2 chunk = GetChunkIndex(collider->Center);
 
-        // Çevresindeki 9 chunk'ı kontrol et
         for (int dx = -1; dx <= 1; dx++)
         {
             for (int dy = -1; dy <= 1; dy++)
@@ -57,15 +56,33 @@ public:
                 {
                     for (SphereCollider *other : it->second)
                     {
-                        if (other != collider && collider->CheckForCollision(other))
+                        if (other == collider)
                         {
-                            return true; // Çarpışma var
+                            continue; // Skip self-collision
+                        }
+
+                        if (collider->CheckForCollision(other))
+                        {
+                            if (collider->Collisions.find(other) != collider->Collisions.end())
+                            {
+                                collider->OnCollisionStay(other);
+                            }
+                            else
+                            {
+                                collider->OnCollisionEnter(other);
+                            }
+                        }
+                        else
+                        {
+                            if (collider->Collisions.find(other) != collider->Collisions.end())
+                            {
+                                collider->OnCollisionExit(other);
+                            }
                         }
                     }
                 }
             }
         }
-        return false; // Çarpışma yok
     }
 };
 #endif

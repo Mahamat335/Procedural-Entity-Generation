@@ -57,13 +57,10 @@ bool Game::Update(float deltaTime)
         }
     }
 
-    /* for (Spider *spider : spiders)
+    for (Spider *spider : spiders)
     {
-        if (CollisionController::Instance().CheckForCollisions(spider->GetCollider()))
-        {
-            std::cout << "Collision detected after movement! \n";
-        }
-    } */
+        CollisionController::Instance().CheckForCollisions(spider->GetCollider());
+    }
 
     RenderEntities(data.modelLoc, *(ShaderManager::Instance().defaultShaderProgram));
     return true;

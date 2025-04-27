@@ -2,18 +2,21 @@
 
 Collider::Collider(Node *parent) : Parent(parent), Center(parent->transform.pos)
 {
+    ID = ColliderCount++;
 }
 
-void Collider::OnCollisionEnter(Collider *collision)
+void Collider::OnCollisionEnter(Collider *other)
 {
-    Collisions.emplace_back(collision);
+    Collisions.insert(other);
+    std::cout << "Collision Enter " << ID << "-" << other->ID << std::endl;
 }
 
-void Collider::OnCollisionExit(Collider *collision)
+void Collider::OnCollisionStay(Collider *other)
 {
-    auto it = std::find(Collisions.begin(), Collisions.end(), collision);
-    if (it != Collisions.end())
-    {
-        Collisions.erase(it);
-    }
+}
+
+void Collider::OnCollisionExit(Collider *other)
+{
+    Collisions.erase(other);
+    std::cout << "Collision Exit " << ID << "-" << other->ID << std::endl;
 }
