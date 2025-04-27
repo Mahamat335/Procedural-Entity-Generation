@@ -129,8 +129,8 @@ int main()
 
 	glm::vec3 lightPos = glm::vec3(0.5f, 0.5f, 0.5f);
 	// Matrices needed for the light's perspective
-	glm::mat4 orthgonalProjection = glm::ortho(-35.0f, 35.0f, -35.0f, 35.0f, 0.1f, 75.0f);
-	glm::mat4 lightView = glm::lookAt(20.0f * lightPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 orthgonalProjection = glm::ortho(-35.0f, 35.0f, -35.0f, 35.0f, 0.1f, 100.0f);
+	glm::mat4 lightView = glm::lookAt(50.0f * lightPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::mat4 lightProjection = orthgonalProjection * lightView;
 
 	shadowMapProgram.use();
@@ -229,10 +229,7 @@ int main()
 			{
 				ChangePolygonMode();
 			}
-			if (ImGui::Checkbox("Spider Movement", &game.data.areSpidersMoving))
-			{
-				game.data.areSpidersMoving = !game.data.areSpidersMoving;
-			}
+			ImGui::Checkbox("Spider Movement", &game.data.areSpidersMoving);
 			ImGui::InputInt("Spider Count", &game.data.spiderGenerationData.SpiderCount);
 			ImGui::InputInt("Min Leg Count", &game.data.spiderGenerationData.LegCountMin);
 			ImGui::InputInt("Max Leg Count", &game.data.spiderGenerationData.LegCountMax);
