@@ -21,8 +21,8 @@ class Game
         bool areSpidersMoving = true;
         SpiderGenerationData spiderGenerationData{
             16,
-            2,
-            10,
+            1,
+            5,
             0.2f,
             0.8f,
             0.25f,

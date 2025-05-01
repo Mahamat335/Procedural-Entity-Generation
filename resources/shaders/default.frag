@@ -127,7 +127,7 @@ vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir
 		lightCoords = (lightCoords + 1.0f) / 2.0f;
 		float currentDepth = lightCoords.z;
 		// Prevents shadow acne
-		float bias = max(0.05f * (1.0f - dot(normal, viewDir)), 0.005f);
+		float bias = max(0.0125f * (1.0f - dot(normal, viewDir)), 0.0025f);
 
 		// Smoothens out the shadows
 		int sampleRadius = 2;

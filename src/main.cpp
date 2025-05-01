@@ -231,8 +231,8 @@ int main()
 			}
 			ImGui::Checkbox("Spider Movement", &game.data.areSpidersMoving);
 			ImGui::InputInt("Spider Count", &game.data.spiderGenerationData.SpiderCount);
-			ImGui::InputInt("Min Leg Count", &game.data.spiderGenerationData.LegCountMin);
-			ImGui::InputInt("Max Leg Count", &game.data.spiderGenerationData.LegCountMax);
+			ImGui::InputInt("Min Leg Pair Count", &game.data.spiderGenerationData.LegPairCountMin);
+			ImGui::InputInt("Max Leg Pair Count", &game.data.spiderGenerationData.LegPairCountMax);
 			ImGui::InputFloat("Min Move Speed", &game.data.spiderGenerationData.MoveSpeedMin);
 			ImGui::InputFloat("Max Move Speed", &game.data.spiderGenerationData.MoveSpeedMax);
 			ImGui::InputFloat("Min Upper Leg Scale", &game.data.spiderGenerationData.UpperLegSizeScaleMin);

@@ -130,7 +130,7 @@ void Game::InitializeSpiders()
         float randomRotation = (rand() % 360) - 180;
         SpiderEntityData spiderData{
             Transform(glm::vec3(-AreaSize.x / 2.0f, -5.0f, -AreaSize.z / 2.0f) + glm::vec3(glm::linearRand(0.0f, AreaSize.x), bodyHeight, glm::linearRand(0.0f, AreaSize.z)), glm::vec3(0.0f, randomRotation, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f)), // EntityTransform
-            glm::linearRand(data.spiderGenerationData.LegCountMin, data.spiderGenerationData.LegCountMax),                                                                                                                                         // LegCount
+            glm::linearRand(data.spiderGenerationData.LegPairCountMin, data.spiderGenerationData.LegPairCountMax) * 2,                                                                                                                             // LegCount
             hipLocationAsDegree,                                                                                                                                                                                                                   // HipLocationAsDegree
             glm::linearRand(data.spiderGenerationData.MoveSpeedMin, data.spiderGenerationData.MoveSpeedMax),                                                                                                                                       // MoveSpeed
             bodySize,                                                                                                                                                                                                                              // BodySize
