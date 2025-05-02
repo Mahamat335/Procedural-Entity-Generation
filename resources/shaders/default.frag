@@ -12,9 +12,11 @@ out vec4 FragColor;
 in vec3 Normal;  
 in vec3 FragPos;  
 in vec3 Color;
+in vec4 fragPosLight;
 
 uniform Material material;
 uniform vec3 viewPos;
+uniform sampler2D shadowMap;
 
 struct PointLight {    
     vec3 position;
@@ -90,6 +92,8 @@ void main()
     
     FragColor = vec4(result, 1.0f);
     FragColor.rgb = pow(FragColor.rgb, vec3(gamma));
+    //vec3 lightCoords = fragPosLight.xyz / fragPosLight.w;
+    //FragColor = texture(shadowMap, lightCoords.xy);
 }
 
 vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir)
@@ -115,10 +119,37 @@ vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir
         spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess * 128);
     }
 
+    float shadow = 0.0f;
+    vec3 lightCoords = fragPosLight.xyz / fragPosLight.w;
+    if(lightCoords.z <= 1.0f)
+	{
+		// Get from [-1, 1] range to [0, 1] range just like the shadow map
+		lightCoords = (lightCoords + 1.0f) / 2.0f;
+		float currentDepth = lightCoords.z;
+		// Prevents shadow acne
+		float bias = max(0.0125f * (1.0f - dot(normal, viewDir)), 0.0025f);
+
+		// Smoothens out the shadows
+		int sampleRadius = 2;
+		vec2 pixelSize = 1.0 / textureSize(shadowMap, 0);
+		for(int y = -sampleRadius; y <= sampleRadius; y++)
+		{
+		    for(int x = -sampleRadius; x <= sampleRadius; x++)
+		    {
+		        float closestDepth = texture(shadowMap, lightCoords.xy + vec2(x, y) * pixelSize).r;
+				if (currentDepth > closestDepth + bias)
+					shadow += 1.0f;     
+		    }    
+		}
+		// Get average shadow
+		shadow /= pow((sampleRadius * 2 + 1), 2);
+
+	}
+
     // combine results
     vec3 ambient  = light.color * light.ambient * ambientColor;
-    vec3 diffuse  = light.color * light.diffuse * diff * diffuseColor;
-    vec3 specular = light.color * light.specular * spec * specularColor;
+    vec3 diffuse  = light.color * light.diffuse * diff * diffuseColor * (1.0f - shadow);
+    vec3 specular = light.color * light.specular * spec * specularColor * (1.0f - shadow);
     return (ambient + diffuse + specular);
 }  
 

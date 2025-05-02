@@ -87,6 +87,8 @@ int main()
 	// Textures
 
 	Shader shaderProgram = *(ShaderManager::Instance().defaultShaderProgram);
+	Shader shadowMapProgram = *(ShaderManager::Instance().shadowMapShaderProgram);
+
 	ShapeRenderer::Instance().Setup();
 
 	// imgui
@@ -101,6 +103,39 @@ int main()
 	float lastCheck = 0;
 
 	game.Start();
+	game.InitializeSpiders();
+
+	// Shadow Calculations
+
+	// Create Frame Buffer Object
+	unsigned int FBO;
+	glGenFramebuffers(1, &FBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
+	// Create Framebuffer Texture
+	unsigned int framebufferTexture;
+	glGenTextures(1, &framebufferTexture);
+	glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // Prevents edge bleeding
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // Prevents edge bleeding
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, framebufferTexture, 0);
+	glDrawBuffer(GL_NONE); // No color buffer is drawn to
+	glReadBuffer(GL_NONE); // No color buffer is drawn to
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glm::vec3 lightPos = glm::vec3(0.5f, 0.5f, 0.5f);
+	// Matrices needed for the light's perspective
+	glm::mat4 orthgonalProjection = glm::ortho(-35.0f, 35.0f, -35.0f, 35.0f, 0.1f, 100.0f);
+	glm::mat4 lightView = glm::lookAt(50.0f * lightPos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 lightProjection = orthgonalProjection * lightView;
+
+	shadowMapProgram.use();
+	glUniformMatrix4fv(glGetUniformLocation(shadowMapProgram.ID, "lightProjection"), 1, GL_FALSE, glm::value_ptr(lightProjection));
+
 	while (!glfwWindowShouldClose(window))
 	{
 		float currentFrame = static_cast<float>(glfwGetTime());
@@ -115,6 +150,20 @@ int main()
 		}
 		lastCheck += deltaTime;
 
+		// Depth testing needed for Shadow Map
+		glEnable(GL_DEPTH_TEST);
+
+		// Preparations for the Shadow Map
+		glViewport(0, 0, width, height);
+		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		// Draw scene for shadow map
+		unsigned int shadowModelLoc = glGetUniformLocation(shadowMapProgram.ID, "model");
+		game.RenderEntities(shadowModelLoc, shadowMapProgram);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -128,6 +177,18 @@ int main()
 			// u can call processInput() here for disable inputs
 			// io.WantCaptureKeyboard is smt.
 		}
+
+		// Shadow
+
+		// reset viewport
+		glViewport(0, 0, width, height);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// we already enabled it: glEnable(GL_DEPTH_TEST);
+		/* glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
+		glClear(GL_DEPTH_BUFFER_BIT); */
+
+		// Camera Rendering
 
 		shaderProgram.use();
 
@@ -145,16 +206,47 @@ int main()
 		// note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
+		// shadow
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "lightProjection"), 1, GL_FALSE, glm::value_ptr(lightProjection));
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+		glUniform1i(glGetUniformLocation(shaderProgram.ID, "shadowMap"), 0);
+
 		unsigned int modelLoc = glGetUniformLocation(shaderProgram.ID, "model");
 		game.data.modelLoc = modelLoc;
 
 		game.Update(deltaTime);
 
+		// shadow clear
+		// glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 		// imgui
-		ImGui::Begin("title?");
-		ImGui::Text("hi");
-		ImGui::SliderFloat("Move Speed: ", &game.data.moveSpeed, 0.0f, 1.0f);
-		ImGui::End();
+		if (game.data.isCursorEnabled)
+		{
+			ImGui::Begin("title?");
+			ImGui::Text("hi");
+			if (ImGui::Checkbox("Polygon Mode", &game.data.polygonMode))
+			{
+				ChangePolygonMode();
+			}
+			ImGui::Checkbox("Spider Movement", &game.data.areSpidersMoving);
+			ImGui::InputInt("Spider Count", &game.data.spiderGenerationData.SpiderCount);
+			ImGui::InputInt("Min Leg Pair Count", &game.data.spiderGenerationData.LegPairCountMin);
+			ImGui::InputInt("Max Leg Pair Count", &game.data.spiderGenerationData.LegPairCountMax);
+			ImGui::InputFloat("Min Move Speed", &game.data.spiderGenerationData.MoveSpeedMin);
+			ImGui::InputFloat("Max Move Speed", &game.data.spiderGenerationData.MoveSpeedMax);
+			ImGui::InputFloat("Min Upper Leg Scale", &game.data.spiderGenerationData.UpperLegSizeScaleMin);
+			ImGui::InputFloat("Max Upper Leg Scale", &game.data.spiderGenerationData.UpperLegSizeScaleMax);
+			ImGui::InputFloat("Min Middle Leg Scale", &game.data.spiderGenerationData.MiddleLegSizeScaleMin);
+			ImGui::InputFloat("Max Middle Leg Scale", &game.data.spiderGenerationData.MiddleLegSizeScaleMax);
+			ImGui::InputFloat("Min Lower Leg Scale", &game.data.spiderGenerationData.LowerLegSizeScaleMin);
+			ImGui::InputFloat("Max Lower Leg Scale", &game.data.spiderGenerationData.LowerLegSizeScaleMax);
+			if (ImGui::Button("Initialize Spiders"))
+			{
+				game.InitializeSpiders();
+			}
+			ImGui::End();
+		}
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -163,10 +255,11 @@ int main()
 		glfwPollEvents();
 
 		// error catching
-		/* GLenum err= glGetError();
-		if (err != GL_NO_ERROR) {
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR)
+		{
 			std::cerr << "OpenGL error: " << err << std::endl;
-		} */
+		}
 	}
 
 	// imgui
@@ -177,6 +270,7 @@ int main()
 	game.End();
 	ShapeRenderer::Instance().Clear();
 	shaderProgram.deleteProgram();
+	shadowMapProgram.deleteProgram();
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;
@@ -203,30 +297,6 @@ void processInput(GLFWwindow *window)
 		camera.SetSpeed(camera.MovementSpeed + 0.1f);
 	if (glfwGetKey(window, GLFW_KEY_SLASH) == GLFW_PRESS)
 		camera.SetSpeed();
-
-	game.data.playerVel = glm::vec3(0.0f, 0.0f, 0.0f);
-	game.data.playerAngularSpeed = 0;
-	if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS)
-		game.data.playerVel.y = game.data.playerSpeed * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
-		game.data.playerVel.y = -game.data.playerSpeed * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
-		game.data.playerVel.x = game.data.playerSpeed * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS)
-		game.data.playerVel.x = -game.data.playerSpeed * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
-		game.data.playerVel.z = game.data.playerSpeed * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)
-		game.data.playerVel.z = -game.data.playerSpeed * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS)
-		game.data.playerAngularSpeed = 1.0f;
-	if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
-		game.data.playerAngularSpeed = -1.0f;
-
-	if ((glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) && (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS))
-	{
-		ChangePolygonMode();
-	}
 
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS)
 	{
@@ -283,8 +353,6 @@ void ChangePolygonMode()
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
-
-	game.data.polygonMode = !game.data.polygonMode;
 }
 
 void ChangeCursorStatus(GLFWwindow *window)
@@ -301,4 +369,5 @@ void ChangeCursorStatus(GLFWwindow *window)
 	}
 
 	game.data.isCursorEnabled = !game.data.isCursorEnabled;
+	camera.CameraLock = !camera.CameraLock;
 }

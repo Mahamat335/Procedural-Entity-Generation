@@ -6,10 +6,12 @@ layout (location = 1) in vec3 aNormal;
 out vec3 Normal;
 out vec3 FragPos;  
 out vec3 Color;
+out vec4 fragPosLight;
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform mat4 lightProjection;
 
 void main()
 {
@@ -19,4 +21,5 @@ void main()
     //FragPos = objectPos * aPos;
     Normal = mat3(transpose(inverse(model))) * aNormal; 
     Color = vec3(1.0, 0.5, 0.31);
+    fragPosLight = lightProjection * model * vec4(aPos, 1.0);
 }

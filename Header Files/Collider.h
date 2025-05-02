@@ -5,23 +5,27 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <stack>
-#include <vector>
+#include <unordered_set>
 #include <Node.h>
 #include <Transform.h>
 #include <glm/glm.hpp>
 
+static int ColliderCount = 0;
+
 class Collider
 {
-
 public:
     glm::vec3 Center;
-    std::vector<Collider *> Collisions;
+    std::unordered_set<Collider *> Collisions;
     Node *Parent;
+    int ID;
     Collider(Node *parent);
+    ~Collider();
     // virtual bool CheckForCollision(Collider *collision) = 0;
     //  virtual bool CheckForCollision(SphereCollider *collision) = 0;
-    void OnCollisionEnter(Collider *collision);
-    void OnCollisionExit(Collider *collision);
+    void OnCollisionEnter(Collider *other);
+    void OnCollisionStay(Collider *other);
+    void OnCollisionExit(Collider *other);
 };
 
 #endif

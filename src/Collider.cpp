@@ -1,19 +1,28 @@
 #include <Collider.h>
+#include <CollisionController.h>
 
 Collider::Collider(Node *parent) : Parent(parent), Center(parent->transform.pos)
 {
+    ID = ColliderCount++;
 }
 
-void Collider::OnCollisionEnter(Collider *collision)
+Collider::~Collider()
 {
-    Collisions.emplace_back(collision);
+    // CollisionController::Instance().RemoveCollider(this);
 }
 
-void Collider::OnCollisionExit(Collider *collision)
+void Collider::OnCollisionEnter(Collider *other)
 {
-    auto it = std::find(Collisions.begin(), Collisions.end(), collision);
-    if (it != Collisions.end())
-    {
-        Collisions.erase(it);
-    }
+    Collisions.insert(other);
+    std::cout << "Collision Enter " << ID << "-" << other->ID << std::endl;
+}
+
+void Collider::OnCollisionStay(Collider *other)
+{
+}
+
+void Collider::OnCollisionExit(Collider *other)
+{
+    Collisions.erase(other);
+    std::cout << "Collision Exit " << ID << "-" << other->ID << std::endl;
 }

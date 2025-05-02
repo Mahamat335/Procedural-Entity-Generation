@@ -2,10 +2,11 @@
 #include <ctime>
 #include <CollisionController.h>
 
-Spider::Spider(SpiderEntityData Data) : _spiderTransform(Data.EntityTransform), _legCount(Data.LegCount), _hipLocationAsDegree(Data.HipLocationAsDegree), _moveSpeed(Data.MoveSpeed), _bodySize(Data.BodySize), _upperLegSize(Data.UpperLegSize), _middleLegSize(Data.MiddleLegSize), _lowerLegSize(Data.LowerLegSize), _upperLegRotationAngle(Data.UpperLegRotationAngle), _middleLegRotationAngle(Data.MiddleLegRotationAngle), _lowerLegRotationAngle(Data.LowerLegRotationAngle)
+Spider::Spider(SpiderEntityData Data) : _spiderTransform(Data.EntityTransform), _legCount(Data.LegCount), _hipLocationAsDegree(Data.HipLocationAsDegree), _moveSpeed(Data.MoveSpeed), _bodySize(Data.BodySize), _upperLegSize(Data.UpperLegSize), _middleLegSize(Data.MiddleLegSize), _lowerLegSize(Data.LowerLegSize), _upperLegRotationAngle(Data.UpperLegRotationAngle), _middleLegRotationAngle(Data.MiddleLegRotationAngle), _lowerLegRotationAngle(Data.LowerLegRotationAngle), _patrolAreaMin(Data.patrolAreaMin), _patrolAreaMax(Data.patrolAreaMax)
 {
     _spiderNode = new Node(_spiderTransform);
     _sBody = new Node(Transform(glm::vec3(), glm::vec3(), _bodySize), SPHERE, Obsidian);
+    _patrolDirection = 1.0f;
 
     _spiderNode->AddChild(_sBody);
 
@@ -40,6 +41,7 @@ Spider::Spider(SpiderEntityData Data) : _spiderTransform(Data.EntityTransform), 
     }
     _rotationDirections = std::vector<glm::vec2>(_sUpperLegsPivot.size(), glm::vec2(1.0f, 1.0f));
     _spiderCollider = new SphereCollider(_spiderNode, CollisionController::Instance().ChunkSize);
+    PickNewTarget();
 }
 
 Node *Spider::GetNode()
@@ -83,17 +85,22 @@ void Spider::Move(float deltaTime)
 
         pivot->Rotate(pivot->transform.eulerRot +
                       glm::vec3(0.0f, 0.0f, _rotationDirections[i][0] * RotationSpeed * deltaTime));
+
+        // Yürüme kısmı
         float rotation = _spiderTransform.eulerRot.y * glm::pi<float>() / 180.0f;
-        glm::vec3 direction = glm::vec3(sin(rotation), 0.0f, cos(rotation));
-        _spiderNode->Move(_spiderNode->transform.pos + direction * _moveSpeed * deltaTime);
+        glm::vec3 moveDirection = glm::vec3(sin(rotation), 0.0f, cos(rotation));
+        _spiderNode->Move(_spiderNode->transform.pos + moveDirection * _moveSpeed * _patrolDirection * deltaTime);
+
+        float distance = glm::distance(glm::vec2(_spiderNode->transform.pos.x, _spiderNode->transform.pos.z),
+                                       glm::vec2(_targetPosition.x, _targetPosition.z));
+
+        if (distance < 1.0f) // 1 birimden küçükse yeni hedef seç
+        {
+            PickNewTarget();
+        }
     }
     _spiderCollider->Update();
     CollisionController::Instance().UpdateCollider(_spiderCollider);
-}
-
-void Spider::Patrol()
-{
-    _moveSpeed *= -1.0f;
 }
 
 void Spider::SetCollider(SphereCollider *sphereCollider)
@@ -109,4 +116,17 @@ SphereCollider *Spider::GetCollider()
 void Spider::SetMoveSpeed(float moveSpeed)
 {
     _moveSpeed = moveSpeed;
+}
+
+void Spider::PickNewTarget()
+{
+    float randomX = _patrolAreaMin.x + static_cast<float>(rand()) / RAND_MAX * (_patrolAreaMax.x - _patrolAreaMin.x);
+    float randomZ = _patrolAreaMin.y + static_cast<float>(rand()) / RAND_MAX * (_patrolAreaMax.y - _patrolAreaMin.y);
+
+    _targetPosition = glm::vec3(randomX, 0.0f, randomZ);
+
+    glm::vec3 direction = glm::normalize(_targetPosition - _spiderNode->transform.pos);
+    float targetAngle = atan2(direction.x, direction.z) * 180.0f / glm::pi<float>();
+    _spiderTransform.eulerRot.y = targetAngle;
+    _spiderNode->transform.eulerRot.y = targetAngle;
 }
