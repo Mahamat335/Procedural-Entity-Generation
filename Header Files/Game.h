@@ -9,7 +9,7 @@
 #include <Transform.h>
 #include <glm/glm.hpp>
 #include <Collider.h>
-#include <SpiderGenerationData.h>
+#include <GenerationData.h>
 
 class Game
 {
@@ -26,11 +26,25 @@ class Game
             0.2f,
             0.8f,
             0.25f,
-            3.0f,
+            0.25f,
             0.25f,
             3.0f,
-            0.25f,
             3.0f,
+            3.0f,
+        };
+        CaterpillarGenerationData caterpillarGenerationData{
+            8,
+            3,
+            8,
+            0.2f,
+            0.8f,
+        };
+        ProducerGenerationData producerGenerationData{
+            8,
+            3,
+            8,
+            0.2f,
+            0.8f,
         };
     };
 
@@ -42,6 +56,8 @@ public:
     void End();
     void RenderEntities(unsigned int modelLoc, Shader shaderProgram);
     void InitializeSpiders();
+    void InitializeCaterpillars();
+    void InitializeProducers();
 };
 
 #endif // GAME_H

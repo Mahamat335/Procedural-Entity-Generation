@@ -4,15 +4,19 @@
 #include <Lights.h>
 #include <ctime>
 #include <Spider.h>
-#include <SpiderEntityData.h>
+#include <Caterpillar.h>
+#include <Producer.h>
+#include <EntityData.h>
 #include <CollisionController.h>
 #include <glm/gtc/random.hpp>
 
-Node root, area, *spidersParent;
+Node root, area, *spidersParent, *caterpillarsParent, *producersParent;
 const glm::vec3 AreaSize(70.0f, 0.1f, 70.0f);
 Game::GameData Game::data = {};
 const int LegCount = 6;
 std::vector<Spider *> spiders;
+std::vector<Caterpillar *> caterpillars;
+std::vector<Producer *> producers;
 
 Game::Game()
 {
@@ -22,15 +26,21 @@ bool Game::Start()
 {
     data = {};
 
-    area = Node(Transform(glm::vec3(0.0f, -5.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), AreaSize), CUBE, Silver);
+    area = Node(Transform(glm::vec3(0.0f, -5.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), AreaSize), CUBE, Bronze);
     root.AddChild(&area);
 
     spidersParent = new Node();
     root.AddChild(spidersParent);
 
+    caterpillarsParent = new Node();
+    root.AddChild(caterpillarsParent);
+
+    producersParent = new Node();
+    root.AddChild(producersParent);
+
     // Light Calculations
     DirectionalLight directionalLight(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(-0.5f, -0.5f, -0.5f));
-    // PointLight pointLight(0, glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+    PointLight pointLight(0, glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
     return true;
 }
@@ -49,6 +59,19 @@ bool Game::Update(float deltaTime)
     for (Spider *spider : spiders)
     {
         CollisionController::Instance().CheckForCollisions(spider->GetCollider());
+    }
+
+    for (Caterpillar *caterpillar : caterpillars)
+    {
+        if (data.areSpidersMoving)
+        {
+            caterpillar->Move(deltaTime);
+        }
+    }
+
+    for (Caterpillar *caterpillar : caterpillars)
+    {
+        CollisionController::Instance().CheckForCollisions(caterpillar->GetCollider());
     }
 
     RenderEntities(data.modelLoc, *(ShaderManager::Instance().defaultShaderProgram));
@@ -100,7 +123,7 @@ void Game::InitializeSpiders()
 
     // Generate Spiders
 
-    for (int i = 0; i < data.spiderGenerationData.SpiderCount; i++)
+    for (int i = 0; i < data.spiderGenerationData.EntityCount; i++)
     {
         float deg2rad = glm::pi<float>() / 180.0f;
         glm::vec3 zRotationAngles(60.0f, 60.0f, 60.0f);
@@ -109,7 +132,8 @@ void Game::InitializeSpiders()
         glm::vec3 upperLegSize, middleLegSize, lowerLegSize;
         float hipLocationAsDegree = 30.0f, bodyHeight;
 
-        while (true)
+        int tryCount = 0;
+        while (tryCount < 20)
         {
             upperLegSize = glm::vec3(0.05f, 1.25f, 0.05f) *
                            glm::linearRand(data.spiderGenerationData.UpperLegSizeScaleMin, data.spiderGenerationData.UpperLegSizeScaleMax); // UpperLegSize
@@ -123,6 +147,13 @@ void Game::InitializeSpiders()
                 bodyHeight = bodySize.y * sin(hipLocationAsDegree * deg2rad) * 0.5f - bodyHeight;
                 break;
             }
+            tryCount++;
+        }
+
+        if (tryCount == 20)
+        {
+            std::cout << "Spider generation failed after 20 attempts." << std::endl;
+            continue;
         }
 
         bodyHeight -= bodySize.y * sin(hipLocationAsDegree * deg2rad) * 0.5f;
@@ -147,5 +178,66 @@ void Game::InitializeSpiders()
         Spider *spider = new Spider(spiderData);
         spidersParent->AddChild(spider->GetNode());
         spiders.emplace_back(spider);
+    }
+}
+
+void Game::InitializeCaterpillars()
+{
+    // Clear Caterpillars
+
+    caterpillars.clear();
+    caterpillarsParent->Destroy(); // TODO check if u can destroy a derivered object. I wanna store this in stack
+    caterpillarsParent = new Node();
+    root.AddChild(caterpillarsParent);
+
+    // Generate Caterpillars
+
+    for (int i = 0; i < data.caterpillarGenerationData.EntityCount; i++)
+    {
+        float deg2rad = glm::pi<float>() / 180.0f;
+        glm::vec3 zRotationAngles(60.0f, 60.0f, 60.0f);
+        glm::vec3 bodySize = glm::vec3(0.8f, 0.4f, 1.0f);
+        float a = zRotationAngles.r, b = zRotationAngles.g, c = zRotationAngles.b;
+
+        float randomRotation = (rand() % 360) - 180;
+        CaterpillarEntityData caterpillarData{
+            Transform(glm::vec3(-AreaSize.x / 2.0f, -5.0f, -AreaSize.z / 2.0f) + glm::vec3(glm::linearRand(0.0f, AreaSize.x), bodySize.y / 2.0f, glm::linearRand(0.0f, AreaSize.z)), glm::vec3(0.0f, randomRotation, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f)), // EntityTransform
+            glm::linearRand(data.caterpillarGenerationData.LegPairCountMin, data.caterpillarGenerationData.LegPairCountMax) * 2,                                                                                                                          // segmentCount
+            glm::linearRand(data.caterpillarGenerationData.MoveSpeedMin, data.caterpillarGenerationData.MoveSpeedMax),                                                                                                                                    // MoveSpeed
+            bodySize,                                                                                                                                                                                                                                     // BodySize
+            glm::vec2(-AreaSize.x / 2.0f, -AreaSize.z / 2.0f),                                                                                                                                                                                            // patrolAreaMin
+            glm::vec2(AreaSize.x / 2.0f, AreaSize.z / 2.0f)                                                                                                                                                                                               // patrolAreaMax
+        };
+
+        Caterpillar *caterpillar = new Caterpillar(caterpillarData);
+        caterpillarsParent->AddChild(caterpillar->GetNode());
+        caterpillars.emplace_back(caterpillar);
+    }
+}
+
+void Game::InitializeProducers()
+{
+    // Clear Producers
+
+    producers.clear();
+    producersParent->Destroy(); // TODO check if u can destroy a derivered object. I wanna store this in stack
+    producersParent = new Node();
+    root.AddChild(producersParent);
+
+    // Generate Producers
+
+    for (int i = 0; i < data.producerGenerationData.EntityCount; i++)
+    {
+        glm::vec3 bodySize = glm::vec3(1.0f, 0.85f, 1.0f);
+
+        float randomRotation = (rand() % 360) - 180;
+        ProducerEntityData producerData{
+            Transform(glm::vec3(-AreaSize.x / 2.0f, -5.0f, -AreaSize.z / 2.0f) + glm::vec3(glm::linearRand(0.0f, AreaSize.x), bodySize.y / 2.0f, glm::linearRand(0.0f, AreaSize.z)), glm::vec3(0.0f, randomRotation, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f)), // EntityTransform
+            bodySize,                                                                                                                                                                                                                                     // BodySize
+        };
+
+        Producer *producer = new Producer(producerData);
+        producersParent->AddChild(producer->GetNode());
+        producers.emplace_back(producer);
     }
 }

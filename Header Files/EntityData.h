@@ -1,5 +1,5 @@
-#ifndef SPIDER_ENTITY_DATA_H
-#define SPIDER_ENTITY_DATA_H
+#ifndef ENTITY_DATA_H
+#define ENTITY_DATA_H
 
 #include <Transform.h>
 #include <glm/glm.hpp>
@@ -14,4 +14,20 @@ public:
     glm::vec2 patrolAreaMin, patrolAreaMax; // Patrol area min and max
 };
 
+struct CaterpillarEntityData
+{
+public:
+    Transform EntityTransform;
+    int SegmentCount;
+    float MoveSpeed;
+    glm::vec3 BodySize;
+    glm::vec2 patrolAreaMin, patrolAreaMax; // Patrol area min and max
+};
+
+struct ProducerEntityData
+{
+public:
+    Transform EntityTransform;
+    glm::vec3 BodySize;
+};
 #endif

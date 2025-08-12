@@ -14,7 +14,7 @@ Collider::~Collider()
 void Collider::OnCollisionEnter(Collider *other)
 {
     Collisions.insert(other);
-    std::cout << "Collision Enter " << ID << "-" << other->ID << std::endl;
+    // std::cout << "Collision Enter " << ID << "-" << other->ID << std::endl;
 }
 
 void Collider::OnCollisionStay(Collider *other)
@@ -24,5 +24,5 @@ void Collider::OnCollisionStay(Collider *other)
 void Collider::OnCollisionExit(Collider *other)
 {
     Collisions.erase(other);
-    std::cout << "Collision Exit " << ID << "-" << other->ID << std::endl;
+    // td::cout << "Collision Exit " << ID << "-" << other->ID << std::endl;
 }

@@ -1,5 +1,8 @@
 *
-
-!header files/
+!Header Files/
 !resources/
 !src/
+!Header Files/**
+!resources/**
+!src/**
+!.gitignore
