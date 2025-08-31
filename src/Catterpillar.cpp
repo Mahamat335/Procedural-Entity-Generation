@@ -5,7 +5,7 @@
 Caterpillar::Caterpillar(CaterpillarEntityData Data) : _caterpillarTransform(Data.EntityTransform), _segmentCount(Data.SegmentCount), _moveSpeed(Data.MoveSpeed), _bodySize(Data.BodySize), _patrolAreaMin(Data.patrolAreaMin), _patrolAreaMax(Data.patrolAreaMax)
 {
     _caterpillarNode = new Node(_caterpillarTransform);
-    _cBody = new Node(Transform(glm::vec3(), glm::vec3(), _bodySize), SPHERE, Obsidian);
+    _cBody = new Node(Transform(glm::vec3(), glm::vec3(), _bodySize), SPHERE, Brass);
 
     _caterpillarNode->AddChild(_cBody);
 
@@ -28,11 +28,6 @@ Node *Caterpillar::GetNode()
 
 void Caterpillar::Move(float deltaTime)
 {
-    float RotationAngleZ = 5.0f; // Bacakların maksimum dönüş açısı
-    float RotationAngleY = 5.0f; // Bacakların maksimum dönüş açısı
-    float RotationSpeed = 20.0f; // Dönüş hızı
-
-    // Yürüme kısmı
     float rotation = _caterpillarTransform.eulerRot.y * glm::pi<float>() / 180.0f;
     glm::vec3 moveDirection = glm::vec3(sin(rotation), 0.0f, cos(rotation));
     _caterpillarNode->Move(_caterpillarNode->transform.pos + moveDirection * _moveSpeed * deltaTime);
@@ -47,6 +42,53 @@ void Caterpillar::Move(float deltaTime)
     _caterpillarCollider->Update();
     CollisionController::Instance().UpdateCollider(_caterpillarCollider);
 }
+
+/* void Caterpillar::Move(float deltaTime)
+{
+
+    // Head pozisyonunu referans al
+    float time = static_cast<float>(clock()) / CLOCKS_PER_SEC;
+    // === 2. BODY FOLLOW LOGIC ===
+    float amplitude = 0.1f;                    // Y dalgalanma miktarı
+    float frequency = 4.0f;                    // Dalgalanma hızı
+    float followDistance = _bodySize.z / 3.0f; // Segmentler arası mesafe
+    // i=1'den başlıyoruz çünkü 0. segment head
+    for (size_t i = _segmentCount; i > 0; i--)
+    {
+        Node *segment = _caterpillarNode->children[i];
+
+        // Önceki segment pozisyonu ile aradaki mesafe
+        glm::vec3 dir = _caterpillarNode->children[i - 1]->transform.pos - segment->transform.pos;
+        float dist = glm::length(dir);
+
+        if (dist > 0.0001f)
+        {
+            dir = glm::normalize(dir);
+            // Segment, followDistance mesafesinde konumlanır
+            segment->transform.pos.y = amplitude * sin(time * frequency + i * 0.5f);
+            segment->Move(segment->transform.pos + glm::normalize(dir) * _moveSpeed * deltaTime);
+        }
+
+        // Sonraki segment için prevPos güncelle
+    }
+    // === 1. HEAD MOVEMENT ===
+
+    float rotation = _caterpillarTransform.eulerRot.y * glm::pi<float>() / 180.0f;
+    glm::vec3 moveDirection = glm::vec3(sin(rotation), 0.0f, cos(rotation));
+    _caterpillarNode->Move(_caterpillarNode->transform.pos + moveDirection * _moveSpeed * deltaTime);
+
+    float distance = glm::distance(glm::vec2(_caterpillarNode->transform.pos.x, _caterpillarNode->transform.pos.z),
+                                   glm::vec2(_targetPosition.x, _targetPosition.z));
+
+    if (distance < 1.0f)
+    {
+        PickNewTarget();
+    }
+
+    // === 3. COLLISION UPDATE ===
+    _caterpillarCollider->Update();
+    CollisionController::Instance().UpdateCollider(_caterpillarCollider);
+} */
 
 void Caterpillar::SetCollider(SphereCollider *sphereCollider)
 {

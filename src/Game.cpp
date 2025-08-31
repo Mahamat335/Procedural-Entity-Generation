@@ -96,14 +96,8 @@ void Game::RenderEntities(unsigned int modelLoc, Shader shaderProgram)
     {
         Node *current = stack.top();
         stack.pop();
-        if (current->Shape == CUBE)
-        {
-            current->DrawMesh(modelLoc, shaderProgram);
-        }
-        else
-        {
-            current->DrawMesh(modelLoc, shaderProgram);
-        }
+        current->DrawMesh(modelLoc, shaderProgram);
+
         for (auto &child : current->children)
         {
             if (child->isEnable)

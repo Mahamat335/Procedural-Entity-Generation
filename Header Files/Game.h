@@ -16,6 +16,7 @@ class Game
     struct GameData
     {
         bool polygonMode = false;
+        bool showColliders = false;
         bool isCursorEnabled = false;
         unsigned int modelLoc;
         bool areSpidersMoving = true;
@@ -36,15 +37,15 @@ class Game
             8,
             3,
             8,
-            0.2f,
-            0.8f,
+            0.4f,
+            1.2f,
         };
         ProducerGenerationData producerGenerationData{
             8,
             3,
             8,
-            0.2f,
-            0.8f,
+            0.4f,
+            1.2f,
         };
     };
 

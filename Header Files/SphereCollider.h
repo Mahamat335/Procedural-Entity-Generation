@@ -12,6 +12,7 @@ public:
     ~SphereCollider();
     bool CheckForCollision(SphereCollider *collision);
     void Update();
+    Node* ColliderNode;
 };
 
 #endif

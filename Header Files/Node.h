@@ -13,6 +13,7 @@
 #include <ShapeType.h>
 #include <ShapeRenderer.h>
 #include <Material.h>
+#include <RenderingLayer.h>
 
 class Node
 {
@@ -29,8 +30,9 @@ public:
     static std::vector<Node *> CubeEntities;
     static std::vector<Node *> SphereEntities;
     Material material;
+    RenderingLayer Layer;
 
-    Node(Transform t = Transform(), ShapeType shape = POINT, Material material = Emerald) : transform(t), Shape(shape), material(material)
+    Node(Transform t = Transform(), ShapeType shape = POINT, Material material = Emerald, RenderingLayer renderingLayer = Default) : transform(t), Shape(shape), material(material), Layer(renderingLayer)
     {
     }
 
@@ -81,7 +83,7 @@ public:
 
     void DrawMesh(unsigned int modelLoc, Shader shaderProgram = *(ShaderManager::Instance().defaultShaderProgram))
     {
-        ShapeRenderer::Instance().Draw(Shape, modelLoc, glm::value_ptr(transform.modelMatrix), material, shaderProgram);
+        ShapeRenderer::Instance().Draw(Shape, Layer, modelLoc, glm::value_ptr(transform.modelMatrix), material, shaderProgram);
     }
 
     void Move(glm::vec3 newPosition)

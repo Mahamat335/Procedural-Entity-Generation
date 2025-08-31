@@ -29,5 +29,6 @@ private:
     glm::vec2 _patrolAreaMin;
     glm::vec2 _patrolAreaMax;
     glm::vec3 _targetPosition;
+    std::vector<glm::vec3> _positionHistory;
 };
 #endif
