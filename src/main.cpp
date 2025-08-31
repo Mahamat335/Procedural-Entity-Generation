@@ -104,6 +104,8 @@ int main()
 
 	game.Start();
 	game.InitializeSpiders();
+	game.InitializeCaterpillars();
+	game.InitializeProducers();
 
 	// Shadow Calculations
 
@@ -225,12 +227,10 @@ int main()
 		{
 			ImGui::Begin("title?");
 			ImGui::Text("hi");
-			if (ImGui::Checkbox("Polygon Mode", &game.data.polygonMode))
-			{
-				ChangePolygonMode();
-			}
+			ImGui::Checkbox("Polygon Mode", &game.data.polygonMode);
+			ImGui::Checkbox("Show Colliders", &game.data.showColliders);
 			ImGui::Checkbox("Spider Movement", &game.data.areSpidersMoving);
-			ImGui::InputInt("Spider Count", &game.data.spiderGenerationData.SpiderCount);
+			ImGui::InputInt("Spider Count", &game.data.spiderGenerationData.EntityCount);
 			ImGui::InputInt("Min Leg Pair Count", &game.data.spiderGenerationData.LegPairCountMin);
 			ImGui::InputInt("Max Leg Pair Count", &game.data.spiderGenerationData.LegPairCountMax);
 			ImGui::InputFloat("Min Move Speed", &game.data.spiderGenerationData.MoveSpeedMin);
@@ -244,6 +244,20 @@ int main()
 			if (ImGui::Button("Initialize Spiders"))
 			{
 				game.InitializeSpiders();
+			}
+			ImGui::InputInt("Caterpillars Count", &game.data.caterpillarGenerationData.EntityCount);
+			ImGui::InputInt("Caterpillars Min Segment Count", &game.data.caterpillarGenerationData.LegPairCountMin);
+			ImGui::InputInt("Caterpillars Max SegmentCount", &game.data.caterpillarGenerationData.LegPairCountMax);
+			ImGui::InputFloat("Caterpillars Min Move Speed", &game.data.caterpillarGenerationData.MoveSpeedMin);
+			ImGui::InputFloat("Caterpillars Max Move Speed", &game.data.caterpillarGenerationData.MoveSpeedMax);
+			if (ImGui::Button("Initialize Caterpillars"))
+			{
+				game.InitializeCaterpillars();
+			}
+			ImGui::InputInt("Producers Count", &game.data.producerGenerationData.EntityCount);
+			if (ImGui::Button("Initialize Producers"))
+			{
+				game.InitializeProducers();
 			}
 			ImGui::End();
 		}
@@ -342,7 +356,7 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
 	camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
-
+/*
 void ChangePolygonMode()
 {
 	if (game.data.polygonMode)
@@ -354,7 +368,7 @@ void ChangePolygonMode()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 }
-
+ */
 void ChangeCursorStatus(GLFWwindow *window)
 {
 	if (game.data.isCursorEnabled)

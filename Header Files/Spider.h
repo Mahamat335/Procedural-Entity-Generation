@@ -3,10 +3,11 @@
 
 #include <glm/glm.hpp>
 #include <Node.h>
-#include <SpiderEntityData.h>
+#include <EntityData.h>
 #include <SphereCollider.h>
+#include <IEntity.h>
 
-class Spider
+class Spider : public IEntity
 {
 public:
     Spider(SpiderEntityData Data);

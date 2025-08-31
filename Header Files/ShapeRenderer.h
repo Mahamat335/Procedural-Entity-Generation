@@ -12,6 +12,7 @@
 #include <Shader.h>
 #include <Material.h>
 #include <ShaderManager.h>
+#include <RenderingLayer.h>
 
 class ShapeRenderer : public Singleton<ShapeRenderer>
 {
@@ -20,7 +21,7 @@ class ShapeRenderer : public Singleton<ShapeRenderer>
 public:
     void Setup();
     void Clear();
-    void Draw(ShapeType shapeType, unsigned int modelLoc, const GLfloat *value, Material material, Shader shaderProgram);
+    void Draw(ShapeType shapeType, RenderingLayer layer, unsigned int modelLoc, const GLfloat *value, Material material, Shader shaderProgram);
 };
 
 class CubeData : public Singleton<CubeData>
