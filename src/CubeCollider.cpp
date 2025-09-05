@@ -1,8 +1,8 @@
 #include <CubeCollider.h>
 
-CubeCollider::CubeCollider(Node *parent, glm::vec3 size) : Collider(parent), size(size)
+CubeCollider::CubeCollider(IEntity *entity, glm::vec3 size) : Collider(entity), size(size)
 {
-    halfSize = size *= 0.5f;
+    halfSize = size * 0.5f;
 }
 
 bool CubeCollider::CheckForCollision(CubeCollider *collision)

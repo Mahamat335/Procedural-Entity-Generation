@@ -9,6 +9,7 @@
 #include <Node.h>
 #include <Transform.h>
 #include <glm/glm.hpp>
+class IEntity;
 
 static int ColliderCount = 0;
 
@@ -17,9 +18,9 @@ class Collider
 public:
     glm::vec3 Center;
     std::unordered_set<Collider *> Collisions;
-    Node *Parent;
+    IEntity *Entity;
     int ID;
-    Collider(Node *parent);
+    Collider(IEntity *entity);
     ~Collider();
     // virtual bool CheckForCollision(Collider *collision) = 0;
     //  virtual bool CheckForCollision(SphereCollider *collision) = 0;

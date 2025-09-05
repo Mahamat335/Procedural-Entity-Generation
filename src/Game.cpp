@@ -14,9 +14,11 @@ Node root, area, *spidersParent, *caterpillarsParent, *producersParent;
 const glm::vec3 AreaSize(70.0f, 0.1f, 70.0f);
 Game::GameData Game::data = {};
 const int LegCount = 6;
-std::vector<Spider *> spiders;
-std::vector<Caterpillar *> caterpillars;
-std::vector<Producer *> producers;
+
+std::vector<Spider *> Game::spiders;
+std::vector<Caterpillar *> Game::caterpillars;
+std::vector<Producer *> Game::producers;
+std::unordered_set<IEntity *> Game::destroyedEntities;
 
 Game::Game()
 {
@@ -75,6 +77,18 @@ bool Game::Update(float deltaTime)
     }
 
     RenderEntities(data.modelLoc, *(ShaderManager::Instance().defaultShaderProgram));
+
+    for (IEntity *entity : destroyedEntities)
+    {
+        entity->Destroy();
+    }
+
+    for (IEntity *entity : destroyedEntities)
+    {
+        delete entity;
+    }
+    destroyedEntities.clear();
+
     return true;
 }
 

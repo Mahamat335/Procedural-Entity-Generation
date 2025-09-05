@@ -1,6 +1,8 @@
 #include <Spider.h>
 #include <ctime>
 #include <CollisionController.h>
+#include <Caterpillar.h>
+#include <Game.h>
 
 Spider::Spider(SpiderEntityData Data) : _spiderTransform(Data.EntityTransform), _legCount(Data.LegCount), _hipLocationAsDegree(Data.HipLocationAsDegree), _moveSpeed(Data.MoveSpeed), _bodySize(Data.BodySize), _upperLegSize(Data.UpperLegSize), _middleLegSize(Data.MiddleLegSize), _lowerLegSize(Data.LowerLegSize), _upperLegRotationAngle(Data.UpperLegRotationAngle), _middleLegRotationAngle(Data.MiddleLegRotationAngle), _lowerLegRotationAngle(Data.LowerLegRotationAngle), _patrolAreaMin(Data.patrolAreaMin), _patrolAreaMax(Data.patrolAreaMax)
 {
@@ -40,7 +42,7 @@ Spider::Spider(SpiderEntityData Data) : _spiderTransform(Data.EntityTransform), 
         _sLowerLegsPivot.at(i)->AddChild(_sLowerLegs.at(i));
     }
     _rotationDirections = std::vector<glm::vec2>(_sUpperLegsPivot.size(), glm::vec2(1.0f, 1.0f));
-    _spiderCollider = new SphereCollider(_spiderNode, CollisionController::Instance().ChunkSize);
+    _spiderCollider = new SphereCollider(this, CollisionController::Instance().ChunkSize);
     PickNewTarget();
 }
 
@@ -129,4 +131,34 @@ void Spider::PickNewTarget()
     float targetAngle = atan2(direction.x, direction.z) * 180.0f / glm::pi<float>();
     _spiderTransform.eulerRot.y = targetAngle;
     _spiderNode->transform.eulerRot.y = targetAngle;
+}
+
+void Spider::Die()
+{
+    Game::destroyedEntities.insert(this);
+}
+
+void Spider::Destroy()
+{
+    Game::spiders.erase(std::remove(Game::spiders.begin(), Game::spiders.end(), this), Game::spiders.end());
+    _spiderNode->Destroy();
+    delete _spiderCollider;
+}
+
+void Spider::OnCollisionEnter(IEntity *other)
+{
+    if (Caterpillar *caterpillar = dynamic_cast<Caterpillar *>(other))
+    {
+        caterpillar->Die();
+    }
+}
+
+void Spider::OnCollisionStay(IEntity *other)
+{
+    // Sürekli temas halinde yapılacak işlemler
+}
+
+void Spider::OnCollisionExit(IEntity *other)
+{
+    // Temas sona erdiğinde yapılacak işlemler
 }

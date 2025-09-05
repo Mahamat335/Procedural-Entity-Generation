@@ -4,7 +4,8 @@
 #include <glm/glm.hpp>
 #include <Node.h>
 #include <EntityData.h>
-#include <SphereCollider.h>
+
+class SphereCollider;
 
 class IEntity
 {
@@ -14,5 +15,10 @@ public:
     virtual void Move(float deltaTime) = 0;
     virtual void SetCollider(SphereCollider *sphereCollider) = 0;
     virtual SphereCollider *GetCollider() = 0;
+    virtual void OnCollisionEnter(IEntity *other) = 0;
+    virtual void OnCollisionStay(IEntity *other) = 0;
+    virtual void OnCollisionExit(IEntity *other) = 0;
+    virtual void Die() = 0;
+    virtual void Destroy() = 0;
 };
 #endif

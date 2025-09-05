@@ -1,11 +1,12 @@
 #include <SphereCollider.h>
 #include <CollisionController.h>
 #include <RenderingLayer.h>
+#include <IEntity.h>
 
-SphereCollider::SphereCollider(Node *parent, float radius) : Collider(parent), Radius(radius)
+SphereCollider::SphereCollider(IEntity *entity, float radius) : Collider(entity), Radius(radius)
 {
     ColliderNode = new Node(Transform(glm::vec3(), glm::vec3(), glm::vec3(radius)), SPHERE, Emerald, Polygon);
-    parent->AddChild(ColliderNode);
+    Entity->GetNode()->AddChild(ColliderNode);
     CollisionController::Instance().AddCollider(this);
 }
 
@@ -21,5 +22,5 @@ bool SphereCollider::CheckForCollision(SphereCollider *collision)
 
 void SphereCollider::Update()
 {
-    Center = Parent->transform.pos;
+    Center = Entity->GetNode()->transform.pos;
 }

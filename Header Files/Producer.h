@@ -15,6 +15,11 @@ public:
     void Move(float deltaTime);
     void SetCollider(SphereCollider *sphereCollider);
     SphereCollider *GetCollider();
+    void OnCollisionEnter(IEntity *other);
+    void OnCollisionStay(IEntity *other);
+    void OnCollisionExit(IEntity *other);
+    void Die();
+    void Destroy();
 
 private:
     Transform _producerTransform;

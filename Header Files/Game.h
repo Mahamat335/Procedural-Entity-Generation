@@ -11,6 +11,10 @@
 #include <Collider.h>
 #include <GenerationData.h>
 
+class Spider;
+class Caterpillar;
+class Producer;
+
 class Game
 {
     struct GameData
@@ -51,6 +55,10 @@ class Game
 
 public:
     static GameData data;
+    static std::vector<Spider *> spiders;
+    static std::vector<Caterpillar *> caterpillars;
+    static std::vector<Producer *> producers;
+    static std::unordered_set<IEntity *> destroyedEntities;
     Game();
     bool Start();
     bool Update(float deltaTime);

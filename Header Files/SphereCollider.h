@@ -8,11 +8,11 @@ class SphereCollider : public Collider
 
 public:
     float Radius;
-    SphereCollider(Node *parent, float radius);
+    SphereCollider(IEntity *entity, float radius);
     ~SphereCollider();
     bool CheckForCollision(SphereCollider *collision);
     void Update();
-    Node* ColliderNode;
+    Node *ColliderNode;
 };
 
 #endif

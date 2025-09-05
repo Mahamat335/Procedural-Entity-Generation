@@ -1,6 +1,8 @@
 #include <Caterpillar.h>
 #include <ctime>
 #include <CollisionController.h>
+#include <Producer.h>
+#include <Game.h>
 
 Caterpillar::Caterpillar(CaterpillarEntityData Data) : _caterpillarTransform(Data.EntityTransform), _segmentCount(Data.SegmentCount), _moveSpeed(Data.MoveSpeed), _bodySize(Data.BodySize), _patrolAreaMin(Data.patrolAreaMin), _patrolAreaMax(Data.patrolAreaMax)
 {
@@ -17,7 +19,7 @@ Caterpillar::Caterpillar(CaterpillarEntityData Data) : _caterpillarTransform(Dat
         _caterpillarNode->AddChild(currentSegment);
     }
 
-    _caterpillarCollider = new SphereCollider(_caterpillarNode, CollisionController::Instance().ChunkSize);
+    _caterpillarCollider = new SphereCollider(this, CollisionController::Instance().ChunkSize);
     PickNewTarget();
 }
 
@@ -66,7 +68,8 @@ void Caterpillar::Move(float deltaTime)
             dir = glm::normalize(dir);
             // Segment, followDistance mesafesinde konumlanır
             segment->transform.pos.y = amplitude * sin(time * frequency + i * 0.5f);
-            segment->Move(segment->transform.pos + glm::normalize(dir) * _moveSpeed * deltaTime);
+            segment->Move(segment->transform.pos + g
+        bool polygonMode = false;lm::normalize(dir) * _moveSpeed * deltaTime);
         }
 
         // Sonraki segment için prevPos güncelle
@@ -116,4 +119,34 @@ void Caterpillar::PickNewTarget()
     float targetAngle = atan2(direction.x, direction.z) * 180.0f / glm::pi<float>();
     _caterpillarTransform.eulerRot.y = targetAngle;
     _caterpillarNode->transform.eulerRot.y = targetAngle;
+}
+
+void Caterpillar::Die()
+{
+    Game::destroyedEntities.insert(this);
+}
+
+void Caterpillar::Destroy()
+{
+    Game::caterpillars.erase(std::remove(Game::caterpillars.begin(), Game::caterpillars.end(), this), Game::caterpillars.end());
+    _caterpillarNode->Destroy();
+    delete _caterpillarCollider;
+}
+
+void Caterpillar::OnCollisionEnter(IEntity *other)
+{
+    if (Producer *producer = dynamic_cast<Producer *>(other))
+    {
+        producer->Die();
+    }
+}
+
+void Caterpillar::OnCollisionStay(IEntity *other)
+{
+    // Caterpillar'ın başka bir nesneyle çarpışma devam ettiğinde yapılacak işlemler
+}
+
+void Caterpillar::OnCollisionExit(IEntity *other)
+{
+    // Caterpillar'ın başka bir nesneyle çarpışma sona erdiğinde yapılacak işlemler
 }

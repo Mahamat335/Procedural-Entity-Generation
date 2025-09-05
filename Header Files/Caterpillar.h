@@ -17,6 +17,11 @@ public:
     void SetMoveSpeed(float movespeed);
     SphereCollider *GetCollider();
     void PickNewTarget();
+    void OnCollisionEnter(IEntity *other);
+    void OnCollisionStay(IEntity *other);
+    void OnCollisionExit(IEntity *other);
+    void Die();
+    void Destroy();
 
 private:
     Transform _caterpillarTransform;
