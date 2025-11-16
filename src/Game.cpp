@@ -10,7 +10,7 @@
 #include <ctime>
 #include <glm/gtc/random.hpp>
 
-Node root, area, *spidersParent, *caterpillarsParent, *producersParent;
+Node root, area, spidersParent, caterpillarsParent, producersParent;
 const glm::vec3 AreaSize(70.0f, 0.1f, 70.0f);
 Game::GameData Game::data = {};
 const int LegCount = 6;
@@ -29,15 +29,9 @@ bool Game::Start() {
                         glm::vec3(0.0f, 0.0f, 0.0f), AreaSize),
               CUBE, Bronze);
   root.AddChild(&area);
-
-  spidersParent = new Node();
-  root.AddChild(spidersParent);
-
-  caterpillarsParent = new Node();
-  root.AddChild(caterpillarsParent);
-
-  producersParent = new Node();
-  root.AddChild(producersParent);
+  root.AddChild(&spidersParent);
+  root.AddChild(&caterpillarsParent);
+  root.AddChild(&producersParent);
 
   // Light Calculations
   DirectionalLight directionalLight(glm::vec3(1.0f, 1.0f, 1.0f),
@@ -102,11 +96,7 @@ bool Game::Update(float deltaTime) {
   return true;
 }
 
-void Game::End() {
-  delete spidersParent;
-  delete caterpillarsParent;
-  delete producersParent;
-}
+void Game::End() { root.children.clear(); }
 
 void Game::RenderEntities(unsigned int modelLoc, Shader shaderProgram) {
   std::stack<Node *> stack;
@@ -133,11 +123,8 @@ void Game::InitializeSpiders() {
   }
 
   spiders.clear();
-  spidersParent->RemoveFromParent();
-  delete spidersParent;
 
-  spidersParent = new Node();
-  root.AddChild(spidersParent);
+  spidersParent.RemoveAllChildren();
 
   // Generate Spiders
 
@@ -209,7 +196,7 @@ void Game::InitializeSpiders() {
     };
 
     Spider *spider = new Spider(spiderData);
-    spidersParent->AddChild(spider->GetNode());
+    spidersParent.AddChild(spider->GetNode());
     spiders.emplace_back(spider);
   }
 }
@@ -220,10 +207,7 @@ void Game::InitializeCaterpillars() {
   }
 
   caterpillars.clear();
-  caterpillarsParent->RemoveFromParent();
-  delete caterpillarsParent;
-  caterpillarsParent = new Node();
-  root.AddChild(caterpillarsParent);
+  caterpillarsParent.RemoveAllChildren();
 
   // Generate Caterpillars
 
@@ -253,7 +237,7 @@ void Game::InitializeCaterpillars() {
     };
 
     Caterpillar *caterpillar = new Caterpillar(caterpillarData);
-    caterpillarsParent->AddChild(caterpillar->GetNode());
+    caterpillarsParent.AddChild(caterpillar->GetNode());
     caterpillars.emplace_back(caterpillar);
   }
 }
@@ -264,10 +248,7 @@ void Game::InitializeProducers() {
   }
 
   producers.clear();
-  producersParent->RemoveFromParent();
-  delete producersParent;
-  producersParent = new Node();
-  root.AddChild(producersParent);
+  producersParent.RemoveAllChildren();
 
   // Generate Producers
 
@@ -286,7 +267,7 @@ void Game::InitializeProducers() {
     };
 
     Producer *producer = new Producer(producerData);
-    producersParent->AddChild(producer->GetNode());
+    producersParent.AddChild(producer->GetNode());
     producers.emplace_back(producer);
   }
 }

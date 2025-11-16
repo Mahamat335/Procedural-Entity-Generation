@@ -35,12 +35,7 @@ public:
        Material material = Emerald, RenderingLayer renderingLayer = Default)
       : transform(t), Shape(shape), material(material), Layer(renderingLayer) {}
 
-  ~Node() {
-    while (!children.empty()) {
-      delete children.back();
-      children.pop_back();
-    }
-  }
+  ~Node() { RemoveAllChildren(); }
   void RemoveFromParent() {
     if (parentPtr) {
       auto &parentChildren = parentPtr->children;
@@ -49,6 +44,13 @@ public:
         parentChildren.erase(it);
       }
       parentPtr = nullptr;
+    }
+  }
+
+  void RemoveAllChildren() {
+    while (!children.empty()) {
+      delete children.back();
+      children.pop_back();
     }
   }
 
