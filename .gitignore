@@ -1,8 +1,36 @@
-*
-!Header Files/
-!resources/
-!src/
-!Header Files/**
-!resources/**
-!src/**
-!.gitignore
+# DERLEME ÇIKTILARI VE ÖNBELLEKLER
+/[Bb]uild/
+/.cache/
+/.clangd/
+
+# IDE VE EDİTÖR AYARLARI
+/.vscode/
+/.vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.VC.db
+*.suo
+
+# DERLENMİŞ DOSYALAR VE ARTEFAKTLAR
+*.exe
+*.obj
+*.lib
+*.dll
+*.pdb
+*.ilk
+*.idb
+*.tlog
+*.so
+*.a
+*.o
+
+# ÇALIŞMA ZAMANI VE DİĞER DOSYALAR
+imgui.ini
+*.log
+*.tmp
+
+# İŞLETİM SİSTEMİ DOSYALARI
+.DS_Store
+Thumbs.db
