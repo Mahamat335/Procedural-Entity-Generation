@@ -1,72 +1,52 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include <glad/glad.h>
+#include <Collider.h>
 #include <GLFW/glfw3.h>
-#include <iostream>
-#include <stack>
+#include <GenerationData.h>
 #include <Node.h>
 #include <Transform.h>
+#include <glad/glad.h>
 #include <glm/glm.hpp>
-#include <Collider.h>
-#include <GenerationData.h>
+#include <iostream>
+#include <stack>
 
 class Spider;
 class Caterpillar;
 class Producer;
 
-class Game
-{
-    struct GameData
-    {
-        bool polygonMode = false;
-        bool showColliders = false;
-        bool isCursorEnabled = false;
-        unsigned int modelLoc;
-        bool areSpidersMoving = true;
-        SpiderGenerationData spiderGenerationData{
-            16,
-            1,
-            5,
-            0.2f,
-            0.8f,
-            0.25f,
-            0.25f,
-            0.25f,
-            3.0f,
-            3.0f,
-            3.0f,
-        };
-        CaterpillarGenerationData caterpillarGenerationData{
-            8,
-            3,
-            8,
-            0.4f,
-            1.2f,
-        };
-        ProducerGenerationData producerGenerationData{
-            8,
-            3,
-            8,
-            0.4f,
-            1.2f,
-        };
+class Game {
+  struct GameData {
+    bool polygonMode = false;
+    bool showColliders = false;
+    bool isCursorEnabled = false;
+    unsigned int modelLoc;
+    bool areSpidersMoving = true;
+    SpiderGenerationData spiderGenerationData{
+        16, 1, 5, 0.2f, 0.8f, 0.25f, 0.25f, 0.25f, 3.0f, 3.0f, 3.0f,
     };
+    CaterpillarGenerationData caterpillarGenerationData{
+        8, 3, 8, 0.4f, 1.2f,
+    };
+    ProducerGenerationData producerGenerationData{
+        8, 3, 8, 0.4f, 1.2f,
+    };
+  };
 
 public:
-    static GameData data;
-    static std::vector<Spider *> spiders;
-    static std::vector<Caterpillar *> caterpillars;
-    static std::vector<Producer *> producers;
-    static std::unordered_set<IEntity *> destroyedEntities;
-    Game();
-    bool Start();
-    bool Update(float deltaTime);
-    void End();
-    void RenderEntities(unsigned int modelLoc, Shader shaderProgram);
-    void InitializeSpiders();
-    void InitializeCaterpillars();
-    void InitializeProducers();
+  static GameData data;
+  static std::vector<Spider *> spiders;
+  static std::vector<Caterpillar *> caterpillars;
+  static std::vector<Producer *> producers;
+  static std::unordered_set<IEntity *> destroyedEntities;
+  Game();
+  bool Start();
+  bool Update(float deltaTime);
+  void End();
+  void RenderEntities(unsigned int modelLoc, Shader shaderProgram);
+  void InitializeSpiders();
+  void InitializeCaterpillars();
+  void InitializeProducers();
 };
 
 #endif // GAME_H
