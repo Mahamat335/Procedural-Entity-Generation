@@ -6,8 +6,9 @@
 #include <EntityData.h>
 #include <SphereCollider.h>
 #include <IEntity.h>
+#include <IEater.h>
 
-class Spider : public IEntity
+class Spider : public IEntity, public IEater
 {
 public:
     Spider(SpiderEntityData Data);
@@ -22,6 +23,7 @@ public:
     void OnCollisionExit(IEntity *other);
     void Die();
     void Destroy();
+    void SizeUp();
 
 private:
     Transform _spiderTransform;

@@ -138,6 +138,10 @@ void Caterpillar::OnCollisionEnter(IEntity *other)
     if (Producer *producer = dynamic_cast<Producer *>(other))
     {
         producer->Die();
+        if (Eat(producer->NutiritionValue))
+        {
+            SizeUp();
+        }
     }
 }
 
@@ -149,4 +153,11 @@ void Caterpillar::OnCollisionStay(IEntity *other)
 void Caterpillar::OnCollisionExit(IEntity *other)
 {
     // Caterpillar'ın başka bir nesneyle çarpışma sona erdiğinde yapılacak işlemler
+}
+
+void Caterpillar::SizeUp()
+{
+    _segmentCount++;
+    Node *currentSegment = new Node(Transform(glm::vec3(0.0f, 0.0f, -(_segmentCount)*_bodySize.z / 3.0f), glm::vec3(), _bodySize * 0.85f), SPHERE, Obsidian);
+    _caterpillarNode->AddChild(currentSegment);
 }

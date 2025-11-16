@@ -150,6 +150,10 @@ void Spider::OnCollisionEnter(IEntity *other)
     if (Caterpillar *caterpillar = dynamic_cast<Caterpillar *>(other))
     {
         caterpillar->Die();
+        if (Eat(caterpillar->NutiritionValue))
+        {
+            SizeUp();
+        }
     }
 }
 
@@ -161,4 +165,10 @@ void Spider::OnCollisionStay(IEntity *other)
 void Spider::OnCollisionExit(IEntity *other)
 {
     // Temas sona erdiğinde yapılacak işlemler
+}
+
+void Spider::SizeUp()
+{
+    _bodySize *= glm::vec3(1.2f, 1.2f, 1.2f);
+    _sBody->transform.scale = _bodySize;
 }

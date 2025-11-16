@@ -4,10 +4,11 @@
 #include <glm/glm.hpp>
 #include <Node.h>
 #include <EntityData.h>
+#include <INutrient.h>
 
 class SphereCollider;
 
-class IEntity
+class IEntity : public INutrient
 {
 public:
     virtual ~IEntity() {}

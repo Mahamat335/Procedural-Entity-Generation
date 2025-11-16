@@ -6,8 +6,9 @@
 #include <EntityData.h>
 #include <SphereCollider.h>
 #include <IEntity.h>
+#include <IEater.h>
 
-class Caterpillar : public IEntity
+class Caterpillar : public IEntity, public IEater
 {
 public:
     Caterpillar(CaterpillarEntityData Data);
@@ -22,6 +23,7 @@ public:
     void OnCollisionExit(IEntity *other);
     void Die();
     void Destroy();
+    void SizeUp();
 
 private:
     Transform _caterpillarTransform;

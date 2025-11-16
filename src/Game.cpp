@@ -58,11 +58,6 @@ bool Game::Update(float deltaTime)
         }
     }
 
-    for (Spider *spider : spiders)
-    {
-        CollisionController::Instance().CheckForCollisions(spider->GetCollider());
-    }
-
     for (Caterpillar *caterpillar : caterpillars)
     {
         if (data.areSpidersMoving)
@@ -71,12 +66,31 @@ bool Game::Update(float deltaTime)
         }
     }
 
+    for (Spider *spider : spiders)
+    {
+        CollisionController::Instance().CheckForCollisions(spider->GetCollider());
+    }
+
     for (Caterpillar *caterpillar : caterpillars)
     {
         CollisionController::Instance().CheckForCollisions(caterpillar->GetCollider());
     }
 
-    RenderEntities(data.modelLoc, *(ShaderManager::Instance().defaultShaderProgram));
+    for (Spider *spider : spiders)
+    {
+        if (spider->UpdateHunger(deltaTime))
+        {
+            spider->Die();
+        }
+    }
+
+    for (Caterpillar *caterpillar : caterpillars)
+    {
+        if (caterpillar->UpdateHunger(deltaTime))
+        {
+            caterpillar->Die();
+        }
+    }
 
     for (IEntity *entity : destroyedEntities)
     {
@@ -89,6 +103,7 @@ bool Game::Update(float deltaTime)
     }
     destroyedEntities.clear();
 
+    RenderEntities(data.modelLoc, *(ShaderManager::Instance().defaultShaderProgram));
     return true;
 }
 

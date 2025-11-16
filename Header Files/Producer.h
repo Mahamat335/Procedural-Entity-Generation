@@ -6,6 +6,7 @@
 #include <EntityData.h>
 #include <SphereCollider.h>
 #include <IEntity.h>
+#include <IEater.h>
 
 class Producer : public IEntity
 {
