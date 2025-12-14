@@ -1,7 +1,9 @@
 #include <CollisionController.h>
 #include <Game.h>
+#include <ParticleSystem.h>
 #include <Producer.h>
 #include <ctime>
+
 
 Producer::Producer(ProducerEntityData Data)
     : _producerTransform(Data.EntityTransform), _bodySize(Data.BodySize) {
@@ -38,7 +40,10 @@ void Producer::SetCollider(SphereCollider *sphereCollider) {
 
 SphereCollider *Producer::GetCollider() { return _producerCollider; }
 
-void Producer::Die() { Game::destroyedEntities.insert(this); }
+void Producer::Die() {
+  ParticleSystem::Instance().EmitPoof(_producerNode->transform.pos);
+  Game::destroyedEntities.insert(this);
+}
 
 void Producer::OnCollisionEnter(IEntity *other) {}
 

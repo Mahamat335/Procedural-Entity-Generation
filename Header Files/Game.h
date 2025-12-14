@@ -1,6 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "Camera.h"
 #include <Collider.h>
 #include <GLFW/glfw3.h>
 #include <GenerationData.h>
@@ -17,6 +18,8 @@ class Producer;
 
 class Game {
   struct GameData {
+    glm::mat4 view;
+    glm::mat4 projection;
     bool polygonMode = false;
     bool showColliders = false;
     bool isCursorEnabled = false;

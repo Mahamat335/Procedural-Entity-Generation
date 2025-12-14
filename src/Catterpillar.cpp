@@ -1,8 +1,10 @@
 #include <Caterpillar.h>
 #include <CollisionController.h>
 #include <Game.h>
+#include <ParticleSystem.h>
 #include <Producer.h>
 #include <ctime>
+
 
 Caterpillar::Caterpillar(CaterpillarEntityData Data)
     : _caterpillarTransform(Data.EntityTransform),
@@ -139,7 +141,11 @@ void Caterpillar::PickNewTarget() {
   _caterpillarNode->transform.eulerRot.y = targetAngle;
 }
 
-void Caterpillar::Die() { Game::destroyedEntities.insert(this); }
+void Caterpillar::Die() {
+
+  ParticleSystem::Instance().EmitPoof(_caterpillarNode->transform.pos);
+  Game::destroyedEntities.insert(this);
+}
 
 void Caterpillar::OnCollisionEnter(IEntity *other) {
   if (Producer *producer = dynamic_cast<Producer *>(other)) {

@@ -1,3 +1,4 @@
+#include "ParticleSystem.h"
 #include <Caterpillar.h>
 #include <CollisionController.h>
 #include <CubeCollider.h>
@@ -38,6 +39,7 @@ bool Game::Start() {
                                     glm::vec3(-0.5f, -0.5f, -0.5f));
   PointLight pointLight(0, glm::vec3(2.0f, 2.0f, 0.0f),
                         glm::vec3(1.0f, 1.0f, 0.0f));
+  ParticleSystem::Instance().Init();
 
   return true;
 }
@@ -93,6 +95,8 @@ bool Game::Update(float deltaTime) {
 
   RenderEntities(data.modelLoc,
                  *(ShaderManager::Instance().defaultShaderProgram));
+  ParticleSystem::Instance().Update(deltaTime);
+  ParticleSystem::Instance().Draw(data.view, data.projection);
   return true;
 }
 

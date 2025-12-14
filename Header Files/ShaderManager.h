@@ -4,18 +4,21 @@
 #include <Shader.h>
 #include <Singleton.h>
 
-class ShaderManager : public Singleton<ShaderManager>
-{
-    friend Singleton<ShaderManager>;
+class ShaderManager : public Singleton<ShaderManager> {
+  friend Singleton<ShaderManager>;
 
 public:
-    Shader *defaultShaderProgram;
-    Shader *shadowMapShaderProgram;
-    ShaderManager()
-    {
-        defaultShaderProgram = new Shader("resources/shaders/default.vert", "resources/shaders/default.frag");
-        shadowMapShaderProgram = new Shader("resources/shaders/shadowMap.vert", "resources/shaders/shadowMap.frag");
-    };
+  Shader *defaultShaderProgram;
+  Shader *shadowMapShaderProgram;
+  Shader *particleShaderProgram;
+  ShaderManager() {
+    defaultShaderProgram = new Shader("resources/shaders/default.vert",
+                                      "resources/shaders/default.frag");
+    shadowMapShaderProgram = new Shader("resources/shaders/shadowMap.vert",
+                                        "resources/shaders/shadowMap.frag");
+    particleShaderProgram = new Shader("resources/shaders/particle.vert",
+                                       "resources/shaders/particle.frag");
+  };
 };
 
 #endif

@@ -1,6 +1,7 @@
 #include <Caterpillar.h>
 #include <CollisionController.h>
 #include <Game.h>
+#include <ParticleSystem.h>
 #include <Spider.h>
 #include <ctime>
 
@@ -172,7 +173,10 @@ void Spider::PickNewTarget() {
   _spiderNode->transform.eulerRot.y = targetAngle;
 }
 
-void Spider::Die() { Game::destroyedEntities.insert(this); }
+void Spider::Die() {
+  ParticleSystem::Instance().EmitPoof(_spiderNode->transform.pos);
+  Game::destroyedEntities.insert(this);
+}
 
 void Spider::OnCollisionEnter(IEntity *other) {
   if (Caterpillar *caterpillar = dynamic_cast<Caterpillar *>(other)) {
