@@ -23,6 +23,10 @@ public:
   void OnCollisionExit(IEntity *other);
   void Die();
   void SizeUp();
+  virtual glm::vec3 GetBodyPosition() override {
+    // SpiderNode'un pozisyonunu dondur
+    return GetNode()->transform.pos;
+  }
 
 private:
   Transform _spiderTransform;

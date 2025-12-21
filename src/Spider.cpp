@@ -73,6 +73,7 @@ Spider::Spider(SpiderEntityData Data)
   _spiderCollider =
       new SphereCollider(this, CollisionController::Instance().ChunkSize);
   PickNewTarget();
+  hungerBar.Setup(glm::vec2(1.2f, 0.15f), 1.5f);
 }
 
 Spider::~Spider() {

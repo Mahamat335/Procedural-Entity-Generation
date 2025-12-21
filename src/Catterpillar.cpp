@@ -5,7 +5,6 @@
 #include <Producer.h>
 #include <ctime>
 
-
 Caterpillar::Caterpillar(CaterpillarEntityData Data)
     : _caterpillarTransform(Data.EntityTransform),
       _segmentCount(Data.SegmentCount), _moveSpeed(Data.MoveSpeed),
@@ -31,6 +30,7 @@ Caterpillar::Caterpillar(CaterpillarEntityData Data)
   _caterpillarCollider =
       new SphereCollider(this, CollisionController::Instance().ChunkSize);
   PickNewTarget();
+  hungerBar.Setup(glm::vec2(0.8f, 0.1f), 0.8f);
 }
 
 Caterpillar::~Caterpillar() {

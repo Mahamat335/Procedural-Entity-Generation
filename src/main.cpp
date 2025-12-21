@@ -1,3 +1,4 @@
+#include "ConfigManager.h"
 #include <Camera.h>
 #include <EBO.h>
 #include <GLFW/glfw3.h>
@@ -25,13 +26,13 @@
 #include <stb/stb_image.h>
 #include <vector>
 
-
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 void ChangePolygonMode();
 void ChangeCursorStatus(GLFWwindow *window);
+void ImGuiUpdate();
 
 const unsigned int width = 1200;
 const unsigned int height = 1200;
@@ -47,6 +48,11 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 Game game;
+
+char saveFileName[64] = "MyConfig";
+std::string selectedConfig = "";
+std::vector<std::string> configFiles;
+bool needRefresh = true;
 
 int main() {
   glfwInit();
@@ -146,6 +152,9 @@ int main() {
       glGetUniformLocation(shadowMapProgram.ID, "lightProjection"), 1, GL_FALSE,
       glm::value_ptr(lightProjection));
 
+  // config init
+  ConfigManager::Instance().Initialize();
+
   while (!glfwWindowShouldClose(window)) {
     float currentFrame = static_cast<float>(glfwGetTime());
     deltaTime = currentFrame - lastFrame;
@@ -236,57 +245,7 @@ int main() {
     // glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // imgui
-    if (game.data.isCursorEnabled) {
-      ImGui::Begin("title?");
-      ImGui::Text("hi");
-      ImGui::Checkbox("Polygon Mode", &game.data.polygonMode);
-      ImGui::Checkbox("Show Colliders", &game.data.showColliders);
-      ImGui::Checkbox("Spider Movement", &game.data.areSpidersMoving);
-      ImGui::InputInt("Spider Count",
-                      &game.data.spiderGenerationData.EntityCount);
-      ImGui::InputInt("Min Leg Pair Count",
-                      &game.data.spiderGenerationData.LegPairCountMin);
-      ImGui::InputInt("Max Leg Pair Count",
-                      &game.data.spiderGenerationData.LegPairCountMax);
-      ImGui::InputFloat("Min Move Speed",
-                        &game.data.spiderGenerationData.MoveSpeedMin);
-      ImGui::InputFloat("Max Move Speed",
-                        &game.data.spiderGenerationData.MoveSpeedMax);
-      ImGui::InputFloat("Min Upper Leg Scale",
-                        &game.data.spiderGenerationData.UpperLegSizeScaleMin);
-      ImGui::InputFloat("Max Upper Leg Scale",
-                        &game.data.spiderGenerationData.UpperLegSizeScaleMax);
-      ImGui::InputFloat("Min Middle Leg Scale",
-                        &game.data.spiderGenerationData.MiddleLegSizeScaleMin);
-      ImGui::InputFloat("Max Middle Leg Scale",
-                        &game.data.spiderGenerationData.MiddleLegSizeScaleMax);
-      ImGui::InputFloat("Min Lower Leg Scale",
-                        &game.data.spiderGenerationData.LowerLegSizeScaleMin);
-      ImGui::InputFloat("Max Lower Leg Scale",
-                        &game.data.spiderGenerationData.LowerLegSizeScaleMax);
-      if (ImGui::Button("Initialize Spiders")) {
-        game.InitializeSpiders();
-      }
-      ImGui::InputInt("Caterpillars Count",
-                      &game.data.caterpillarGenerationData.EntityCount);
-      ImGui::InputInt("Caterpillars Min Segment Count",
-                      &game.data.caterpillarGenerationData.LegPairCountMin);
-      ImGui::InputInt("Caterpillars Max SegmentCount",
-                      &game.data.caterpillarGenerationData.LegPairCountMax);
-      ImGui::InputFloat("Caterpillars Min Move Speed",
-                        &game.data.caterpillarGenerationData.MoveSpeedMin);
-      ImGui::InputFloat("Caterpillars Max Move Speed",
-                        &game.data.caterpillarGenerationData.MoveSpeedMax);
-      if (ImGui::Button("Initialize Caterpillars")) {
-        game.InitializeCaterpillars();
-      }
-      ImGui::InputInt("Producers Count",
-                      &game.data.producerGenerationData.EntityCount);
-      if (ImGui::Button("Initialize Producers")) {
-        game.InitializeProducers();
-      }
-      ImGui::End();
-    }
+    ImGuiUpdate();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -402,4 +361,130 @@ void ChangeCursorStatus(GLFWwindow *window) {
 
   game.data.isCursorEnabled = !game.data.isCursorEnabled;
   camera.CameraLock = !camera.CameraLock;
+}
+
+void ImGuiUpdate() {
+  if (game.data.isCursorEnabled) {
+    ImGui::Begin("Game Settings");
+
+    // ---------------------------------------------------------
+    // BOLUM 1: CONFIGURATION MANAGER (SAVE / LOAD)
+    // ---------------------------------------------------------
+    if (ImGui::CollapsingHeader("Configuration Manager",
+                                ImGuiTreeNodeFlags_DefaultOpen)) {
+      // Dosya listesini guncelle
+      if (needRefresh) {
+        configFiles = ConfigManager::Instance().GetConfigFileList();
+        needRefresh = false;
+      }
+
+      // SAVE
+      ImGui::Text("Save Configuration:");
+      ImGui::InputText("##savefile", saveFileName, IM_ARRAYSIZE(saveFileName));
+      ImGui::SameLine();
+      if (ImGui::Button("Save")) {
+        ConfigManager::Instance().SaveConfig(saveFileName, game.data);
+        needRefresh = true; // Listeyi yenile ki yeni dosya gozuksun
+      }
+
+      // LOAD
+      ImGui::Spacing();
+      ImGui::Text("Load Configuration:");
+
+      // Dropdown Menu
+      const char *preview =
+          selectedConfig.empty() ? "Select Config..." : selectedConfig.c_str();
+      if (ImGui::BeginCombo("##loadfile", preview)) {
+        for (const auto &file : configFiles) {
+          bool isSelected = (selectedConfig == file);
+          if (ImGui::Selectable(file.c_str(), isSelected)) {
+            selectedConfig = file;
+          }
+          if (isSelected) {
+            ImGui::SetItemDefaultFocus();
+          }
+        }
+        ImGui::EndCombo();
+      }
+
+      ImGui::SameLine();
+      if (ImGui::Button("Load") && !selectedConfig.empty()) {
+        ConfigManager::Instance().LoadConfig(selectedConfig, game.data);
+
+        // İstersen Load işleminden sonra dünyayı otomatik yenilemek için:
+        // game.InitializeSpiders();
+        // game.InitializeCaterpillars();
+        // game.InitializeProducers();
+        // Ama şimdilik manuel butona basarak yenilemek daha güvenli olabilir.
+      }
+    }
+
+    ImGui::Separator();
+
+    // ---------------------------------------------------------
+    // BOLUM 2: SIMULATION PARAMETERS (SENİN ESKİ KODLARIN)
+    // ---------------------------------------------------------
+
+    ImGui::Text("General Settings");
+    ImGui::Checkbox("Polygon Mode", &game.data.polygonMode);
+    ImGui::Checkbox("Show Colliders", &game.data.showColliders);
+    ImGui::Checkbox("Spider Movement", &game.data.areSpidersMoving);
+
+    ImGui::Separator();
+
+    ImGui::Text("Spider Settings");
+    ImGui::InputInt("Spider Count",
+                    &game.data.spiderGenerationData.EntityCount);
+    ImGui::InputInt("Min Leg Pair Count",
+                    &game.data.spiderGenerationData.LegPairCountMin);
+    ImGui::InputInt("Max Leg Pair Count",
+                    &game.data.spiderGenerationData.LegPairCountMax);
+    ImGui::InputFloat("Min Move Speed",
+                      &game.data.spiderGenerationData.MoveSpeedMin);
+    ImGui::InputFloat("Max Move Speed",
+                      &game.data.spiderGenerationData.MoveSpeedMax);
+    ImGui::InputFloat("Min Upper Leg Scale",
+                      &game.data.spiderGenerationData.UpperLegSizeScaleMin);
+    ImGui::InputFloat("Max Upper Leg Scale",
+                      &game.data.spiderGenerationData.UpperLegSizeScaleMax);
+    ImGui::InputFloat("Min Middle Leg Scale",
+                      &game.data.spiderGenerationData.MiddleLegSizeScaleMin);
+    ImGui::InputFloat("Max Middle Leg Scale",
+                      &game.data.spiderGenerationData.MiddleLegSizeScaleMax);
+    ImGui::InputFloat("Min Lower Leg Scale",
+                      &game.data.spiderGenerationData.LowerLegSizeScaleMin);
+    ImGui::InputFloat("Max Lower Leg Scale",
+                      &game.data.spiderGenerationData.LowerLegSizeScaleMax);
+    if (ImGui::Button("Initialize Spiders")) {
+      game.InitializeSpiders();
+    }
+
+    ImGui::Separator();
+
+    ImGui::Text("Caterpillar Settings");
+    ImGui::InputInt("Caterpillars Count",
+                    &game.data.caterpillarGenerationData.EntityCount);
+    ImGui::InputInt("Caterpillars Min Segment Count",
+                    &game.data.caterpillarGenerationData.LegPairCountMin);
+    ImGui::InputInt("Caterpillars Max SegmentCount",
+                    &game.data.caterpillarGenerationData.LegPairCountMax);
+    ImGui::InputFloat("Caterpillars Min Move Speed",
+                      &game.data.caterpillarGenerationData.MoveSpeedMin);
+    ImGui::InputFloat("Caterpillars Max Move Speed",
+                      &game.data.caterpillarGenerationData.MoveSpeedMax);
+    if (ImGui::Button("Initialize Caterpillars")) {
+      game.InitializeCaterpillars();
+    }
+
+    ImGui::Separator();
+
+    ImGui::Text("Producer Settings");
+    ImGui::InputInt("Producers Count",
+                    &game.data.producerGenerationData.EntityCount);
+    if (ImGui::Button("Initialize Producers")) {
+      game.InitializeProducers();
+    }
+
+    ImGui::End();
+  }
 }

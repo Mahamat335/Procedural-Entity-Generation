@@ -11,6 +11,7 @@ public:
   Shader *defaultShaderProgram;
   Shader *shadowMapShaderProgram;
   Shader *particleShaderProgram;
+  Shader *barShaderProgram;
   ShaderManager() {
     defaultShaderProgram = new Shader("resources/shaders/default.vert",
                                       "resources/shaders/default.frag");
@@ -18,6 +19,8 @@ public:
                                         "resources/shaders/shadowMap.frag");
     particleShaderProgram = new Shader("resources/shaders/particle.vert",
                                        "resources/shaders/particle.frag");
+    barShaderProgram =
+        new Shader("resources/shaders/bar.vert", "resources/shaders/bar.frag");
   };
 };
 

@@ -17,6 +17,7 @@ class Caterpillar;
 class Producer;
 
 class Game {
+public:
   struct GameData {
     glm::mat4 view;
     glm::mat4 projection;
@@ -50,6 +51,9 @@ public:
   void InitializeSpiders();
   void InitializeCaterpillars();
   void InitializeProducers();
+
+private:
+  void DrawHungerBars(const glm::mat4 &view, const glm::mat4 &projection);
 };
 
 #endif // GAME_H

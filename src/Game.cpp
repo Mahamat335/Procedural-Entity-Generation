@@ -1,4 +1,5 @@
 #include "ParticleSystem.h"
+#include <BarRenderer.h>
 #include <Caterpillar.h>
 #include <CollisionController.h>
 #include <CubeCollider.h>
@@ -40,6 +41,7 @@ bool Game::Start() {
   PointLight pointLight(0, glm::vec3(2.0f, 2.0f, 0.0f),
                         glm::vec3(1.0f, 1.0f, 0.0f));
   ParticleSystem::Instance().Init();
+  BarRenderer::Instance().Init();
 
   return true;
 }
@@ -97,6 +99,7 @@ bool Game::Update(float deltaTime) {
                  *(ShaderManager::Instance().defaultShaderProgram));
   ParticleSystem::Instance().Update(deltaTime);
   ParticleSystem::Instance().Draw(data.view, data.projection);
+  DrawHungerBars(data.view, data.projection);
   return true;
 }
 
@@ -273,5 +276,24 @@ void Game::InitializeProducers() {
     Producer *producer = new Producer(producerData);
     producersParent.AddChild(producer->GetNode());
     producers.emplace_back(producer);
+  }
+}
+
+void Game::DrawHungerBars(const glm::mat4 &view, const glm::mat4 &projection) {
+
+  // --- SPIDERS ---
+  for (Spider *spider : spiders) {
+    if (spider && spider->GetNode()->isEnable) {
+      // TEK SATIR:
+      spider->RenderHungerBar(view, projection);
+    }
+  }
+
+  // --- CATERPILLARS ---
+  for (Caterpillar *cat : caterpillars) {
+    if (cat && cat->GetNode()->isEnable) {
+      // TEK SATIR:
+      cat->RenderHungerBar(view, projection);
+    }
   }
 }
