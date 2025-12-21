@@ -47,7 +47,8 @@ public:
   bool Start();
   bool Update(float deltaTime);
   void End();
-  void RenderEntities(unsigned int modelLoc, Shader shaderProgram);
+  void RenderEntities(unsigned int modelLoc, Shader shaderProgram,
+                      bool isShadowPass = false);
   void InitializeSpiders();
   void InitializeCaterpillars();
   void InitializeProducers();

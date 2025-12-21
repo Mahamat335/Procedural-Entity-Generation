@@ -1,10 +1,12 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
+#include <AnalyticsManager.h>
 #include <EntityData.h>
 #include <INutrient.h>
 #include <Node.h>
 #include <glm/glm.hpp>
+
 
 class SphereCollider;
 

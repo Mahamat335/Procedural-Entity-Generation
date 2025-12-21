@@ -142,7 +142,8 @@ void Caterpillar::PickNewTarget() {
 }
 
 void Caterpillar::Die() {
-
+  AnalyticsManager::Instance().LogDeath(EntityType::Caterpillar,
+                                        _caterpillarNode->transform.pos);
   ParticleSystem::Instance().EmitPoof(_caterpillarNode->transform.pos);
   Game::destroyedEntities.insert(this);
 }

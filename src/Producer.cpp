@@ -4,7 +4,6 @@
 #include <Producer.h>
 #include <ctime>
 
-
 Producer::Producer(ProducerEntityData Data)
     : _producerTransform(Data.EntityTransform), _bodySize(Data.BodySize) {
   _producerNode = new Node(_producerTransform);
@@ -41,6 +40,8 @@ void Producer::SetCollider(SphereCollider *sphereCollider) {
 SphereCollider *Producer::GetCollider() { return _producerCollider; }
 
 void Producer::Die() {
+  AnalyticsManager::Instance().LogDeath(EntityType::Producer,
+                                        _producerNode->transform.pos);
   ParticleSystem::Instance().EmitPoof(_producerNode->transform.pos);
   Game::destroyedEntities.insert(this);
 }

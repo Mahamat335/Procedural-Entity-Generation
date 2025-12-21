@@ -175,6 +175,8 @@ void Spider::PickNewTarget() {
 }
 
 void Spider::Die() {
+  AnalyticsManager::Instance().LogDeath(EntityType::Spider,
+                                        _spiderNode->transform.pos);
   ParticleSystem::Instance().EmitPoof(_spiderNode->transform.pos);
   Game::destroyedEntities.insert(this);
 }

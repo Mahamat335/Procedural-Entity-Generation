@@ -1,3 +1,4 @@
+#include "AnalyticsManager.h"
 #include "ParticleSystem.h"
 #include <BarRenderer.h>
 #include <Caterpillar.h>
@@ -47,6 +48,9 @@ bool Game::Start() {
 }
 
 bool Game::Update(float deltaTime) {
+  AnalyticsManager::Instance().LogSnapshot(
+      (float)glfwGetTime(), (int)spiders.size(), (int)caterpillars.size(),
+      (int)producers.size());
   // spider movement
   for (Spider *spider : spiders) {
     if (data.areSpidersMoving) {
@@ -103,9 +107,21 @@ bool Game::Update(float deltaTime) {
   return true;
 }
 
-void Game::End() { root.children.clear(); }
+void Game::End() {
+  AnalyticsManager::Instance().EndCurrentRun(glfwGetTime());
+  root.children.clear();
+}
 
-void Game::RenderEntities(unsigned int modelLoc, Shader shaderProgram) {
+void Game::RenderEntities(unsigned int modelLoc, Shader shaderProgram,
+                          bool isShadowPass) {
+  // YÖNTEM 1: Geçici olarak ShowColliders'ı kapat (En kolayı)
+  bool originalShowColliders = data.showColliders;
+
+  // Eğer gölge haritası çiziyorsak, collider'ları ASLA gösterme
+  if (isShadowPass) {
+    data.showColliders = false;
+  }
+
   std::stack<Node *> stack;
   for (auto &child : root.children) {
     if (child->isEnable)
@@ -121,6 +137,10 @@ void Game::RenderEntities(unsigned int modelLoc, Shader shaderProgram) {
       if (child->isEnable)
         stack.push(child);
     }
+  }
+
+  if (isShadowPass) {
+    data.showColliders = originalShowColliders;
   }
 }
 

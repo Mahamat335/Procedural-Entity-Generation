@@ -1,3 +1,4 @@
+#include "AnalyticsManager.h"
 #include "ConfigManager.h"
 #include <Camera.h>
 #include <EBO.h>
@@ -49,10 +50,17 @@ float lastFrame = 0.0f;
 
 Game game;
 
+// config
 char saveFileName[64] = "MyConfig";
 std::string selectedConfig = "";
 std::vector<std::string> configFiles;
 bool needRefresh = true;
+
+// ImGui analytics icin state
+std::string selectedRunFile = ""; // Name degil File
+int selectedRunIndex = -1;
+std::vector<std::string> runFiles;
+bool needAnalyticsRefresh = true;
 
 int main() {
   glfwInit();
@@ -108,9 +116,6 @@ int main() {
   float lastCheck = 0;
 
   game.Start();
-  game.InitializeSpiders();
-  game.InitializeCaterpillars();
-  game.InitializeProducers();
 
   // Shadow Calculations
 
@@ -178,7 +183,7 @@ int main() {
     // Draw scene for shadow map
     unsigned int shadowModelLoc =
         glGetUniformLocation(shadowMapProgram.ID, "model");
-    game.RenderEntities(shadowModelLoc, shadowMapProgram);
+    game.RenderEntities(shadowModelLoc, shadowMapProgram, true);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -425,6 +430,24 @@ void ImGuiUpdate() {
     // BOLUM 2: SIMULATION PARAMETERS (SENİN ESKİ KODLARIN)
     // ---------------------------------------------------------
 
+    if (ImGui::Button("Start Simulation")) {
+      AnalyticsManager::Instance().EndCurrentRun(glfwGetTime());
+      size_t count = AnalyticsManager::Instance().GetRunFileList().size();
+      std::string runName = "Run_" + std::to_string(count + 1);
+      AnalyticsManager::Instance().StartNewRun(game.data, runName);
+
+      game.InitializeSpiders();
+      game.InitializeCaterpillars();
+      game.InitializeProducers();
+
+      std::cout << "[ImGui] Started simulation with " << runName << std::endl;
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("End Current Simulation")) {
+      AnalyticsManager::Instance().EndCurrentRun(glfwGetTime());
+    }
+
     ImGui::Text("General Settings");
     ImGui::Checkbox("Polygon Mode", &game.data.polygonMode);
     ImGui::Checkbox("Show Colliders", &game.data.showColliders);
@@ -486,5 +509,92 @@ void ImGuiUpdate() {
     }
 
     ImGui::End();
+
+    // BOLUM 3: ANALYTICS WINDOW (YENI PENCERE)
+    // ---------------------------------------------------------
+
+    ImGui::SetNextWindowPos(ImVec2(width - 400, 50), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(380, 500), ImGuiCond_FirstUseEver);
+
+    ImGui::Begin("Simulation Analytics"); // Yeni bir pencere baslatiyoruz
+
+    // 1. CANLI DURUM
+    const auto *currentRun =
+        AnalyticsManager::Instance().GetCurrentRunResults();
+    if (currentRun) {
+      // ... (Bu kisim ayni) ...
+      // Grafikleri canli gormek istersen buraya da PlotLines ekleyebilirsin
+      // Ama simdilik snapshot sayisini yazdiralim
+      ImGui::Text("Data Points Collected: %d",
+                  (int)currentRun->Snapshots.size());
+    }
+
+    // 2. GECMIS KOSULAR (DOSYADAN)
+    if (ImGui::CollapsingHeader("Historical Runs (Files)",
+                                ImGuiTreeNodeFlags_DefaultOpen)) {
+      // Listeyi yenile (Refresh butonu veya flag ile)
+      if (ImGui::Button("Refresh List") || needAnalyticsRefresh) {
+        runFiles = AnalyticsManager::Instance().GetRunFileList();
+        needAnalyticsRefresh = false;
+      }
+
+      const char *preview = selectedRunFile.empty() ? "Select Run File..."
+                                                    : selectedRunFile.c_str();
+      if (ImGui::BeginCombo("##selectrun", preview)) {
+        for (int i = 0; i < runFiles.size(); ++i) {
+          bool isSelected = (selectedRunFile == runFiles[i]);
+          if (ImGui::Selectable(runFiles[i].c_str(), isSelected)) {
+            selectedRunFile = runFiles[i];
+            // DOSYAYI YUKLE
+            AnalyticsManager::Instance().LoadRun(selectedRunFile);
+          }
+          if (isSelected)
+            ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+      }
+    }
+
+    // 3. YUKLENEN KOSUNUN GRAFIKLERI
+    const auto *loadedRun = AnalyticsManager::Instance().GetLoadedRunResults();
+
+    if (loadedRun) {
+      ImGui::Separator();
+      ImGui::Text("Loaded: %s", loadedRun->RunName.c_str());
+      ImGui::Text("Duration: %.2f s", loadedRun->TotalRunTime);
+      // ... Olum istatistikleri vs ...
+
+      ImGui::Separator();
+
+      // GRAFIKLER
+      const auto &spiders = AnalyticsManager::Instance().PlotSpiderCounts;
+      const auto &caterpillars =
+          AnalyticsManager::Instance().PlotCaterpillarCounts;
+
+      if (!spiders.empty()) {
+        // Max deger bulma
+        float max_val = 0.0f;
+        for (float v : spiders)
+          if (v > max_val)
+            max_val = v;
+        for (float v : caterpillars)
+          if (v > max_val)
+            max_val = v;
+        max_val = std::max(max_val, 10.0f);
+
+        ImGui::TextColored(ImVec4(1, 0, 0, 1), "Red: Spiders");
+        ImGui::PlotLines("##s_graph", spiders.data(), (int)spiders.size(), 0,
+                         NULL, 0.0f, max_val, ImVec2(0, 80));
+
+        ImGui::TextColored(ImVec4(0, 1, 0, 1), "Green: Caterpillars");
+        ImGui::PlotLines("##c_graph", caterpillars.data(),
+                         (int)caterpillars.size(), 0, NULL, 0.0f, max_val,
+                         ImVec2(0, 80));
+      } else {
+        ImGui::TextDisabled("No data points available in this file.");
+      }
+    }
+
+    ImGui::End(); // Simulation Analytics penceresi bitti
   }
 }
