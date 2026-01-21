@@ -163,7 +163,7 @@ int main() {
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
     if (lastCheck > 0.5f) {
-      std::string fps = std::to_string(1 / deltaTime);
+      std::string fps = "FPS: " + std::to_string(1 / deltaTime);
       glfwSetWindowTitle(window, fps.c_str());
       lastCheck = 0;
     }
