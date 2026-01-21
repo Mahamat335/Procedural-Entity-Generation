@@ -10,7 +10,6 @@
 #include <Material.h>
 #include <Producer.h>
 #include <Spider.h>
-#include <ctime>
 #include <glm/gtc/random.hpp>
 
 Node root, area, spidersParent, caterpillarsParent, producersParent;

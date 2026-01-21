@@ -12,17 +12,17 @@ class Caterpillar : public IEntity, public IEater {
 public:
   Caterpillar(CaterpillarEntityData Data);
   ~Caterpillar();
-  Node *GetNode();
-  void Move(float deltaTime);
-  void SetCollider(SphereCollider *sphereCollider);
+  Node *GetNode() override;
+  void Move(float deltaTime) override;
+  void SetCollider(SphereCollider *sphereCollider) override;
   void SetMoveSpeed(float movespeed);
-  SphereCollider *GetCollider();
+  SphereCollider *GetCollider() override;
   void PickNewTarget();
-  void OnCollisionEnter(IEntity *other);
-  void OnCollisionStay(IEntity *other);
-  void OnCollisionExit(IEntity *other);
-  void Die();
-  void SizeUp();
+  void OnCollisionEnter(IEntity *other) override;
+  void OnCollisionStay(IEntity *other) override;
+  void OnCollisionExit(IEntity *other) override;
+  void Die() override;
+  void SizeUp() override;
   virtual glm::vec3 GetBodyPosition() override {
     return GetNode()->transform.pos;
   }

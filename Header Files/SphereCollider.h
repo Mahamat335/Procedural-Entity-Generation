@@ -3,16 +3,16 @@
 
 #include <Collider.h>
 
-class SphereCollider : public Collider
-{
+class SphereCollider : public Collider {
 
 public:
-    float Radius;
-    SphereCollider(IEntity *entity, float radius);
-    ~SphereCollider();
-    bool CheckForCollision(SphereCollider *collision);
-    void Update();
-    Node *ColliderNode;
+  float Radius;
+  SphereCollider(IEntity *entity, float radius);
+  ~SphereCollider();
+  bool CheckForCollision(SphereCollider *collision);
+  void Update();
+  Node *ColliderNode;
+  glm::ivec2 registeredChunk = glm::ivec2(-999, -999);
 };
 
 #endif

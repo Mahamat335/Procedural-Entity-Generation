@@ -22,8 +22,6 @@
 #include <imgui_impl_opengl3.h>
 #include <iostream>
 #include <math.h>
-#include <memory>
-#include <stack>
 #include <stb/stb_image.h>
 #include <vector>
 
@@ -164,12 +162,12 @@ int main() {
     float currentFrame = static_cast<float>(glfwGetTime());
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
-    if (lastCheck > 1 / 2) {
+    if (lastCheck > 0.5f) {
       std::string fps = std::to_string(1 / deltaTime);
       glfwSetWindowTitle(window, fps.c_str());
-      processInput(window);
       lastCheck = 0;
     }
+    processInput(window);
     lastCheck += deltaTime;
 
     // Depth testing needed for Shadow Map

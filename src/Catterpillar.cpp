@@ -3,7 +3,6 @@
 #include <Game.h>
 #include <ParticleSystem.h>
 #include <Producer.h>
-#include <ctime>
 
 Caterpillar::Caterpillar(CaterpillarEntityData Data)
     : _caterpillarTransform(Data.EntityTransform),
