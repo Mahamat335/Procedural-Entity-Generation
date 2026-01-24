@@ -1,3 +1,4 @@
+#include "glm/gtc/random.hpp"
 #include <Caterpillar.h>
 #include <CollisionController.h>
 #include <Game.h>
@@ -187,6 +188,13 @@ void Spider::OnCollisionEnter(IEntity *other) {
     if (Eat(caterpillar->NutiritionValue)) {
       SizeUp();
     }
+  } else if (Spider *otherSpider = dynamic_cast<Spider *>(other)) {
+    if (IsReadyToPropose(Hunger, MaxHunger, FeedLevel) &&
+        otherSpider->IsReadyToReproduce(otherSpider->Hunger,
+                                        otherSpider->MaxHunger,
+                                        otherSpider->FeedLevel)) {
+      Reproduce(otherSpider);
+    }
   }
 }
 
@@ -201,4 +209,61 @@ void Spider::OnCollisionExit(IEntity *other) {
 void Spider::SizeUp() {
   _bodySize *= glm::vec3(1.2f, 1.2f, 1.2f);
   _sBody->transform.scale = _bodySize;
+}
+
+void Spider::Reproduce(IReproducible *otherPartner) {
+  Spider *partner = static_cast<Spider *>(otherPartner);
+  float mRate = Game::data.spiderGenerationData.MutationRate;
+
+  // Üreme sonrası ebeveynleri bitkin düşür (Sonsuz üreme döngüsünü kırmak için)
+  this->Hunger = this->MaxHunger * 0.6f;
+  this->FeedLevel = 1;
+  partner->Hunger = partner->MaxHunger * 0.6f;
+  partner->FeedLevel = 1;
+
+  // Yeni genetik verileri hesapla
+  SpiderEntityData babyData;
+
+  // 1. Leg Count (Çift sayısını korumak için önce çift sayısını hesaplayıp 2
+  // ile çarpıyoruz)
+  int myPairs = this->_legCount / 2;
+  int partnerPairs = partner->_legCount / 2;
+  babyData.LegCount = CalculateTrait(myPairs, partnerPairs, mRate) * 2;
+  if (babyData.LegCount < 2)
+    babyData.LegCount = 2;
+
+  // 2. Hareket Hızı
+  babyData.MoveSpeed =
+      CalculateTrait(this->_moveSpeed, partner->_moveSpeed, mRate);
+
+  // 3. Vücut Boyutu
+  babyData.BodySize = glm::vec3(0.8f, 0.4f, 1.0f);
+
+  // 4. Bacak Boyutları
+  babyData.UpperLegSize =
+      CalculateTrait(this->_upperLegSize, partner->_upperLegSize, mRate);
+  babyData.MiddleLegSize =
+      CalculateTrait(this->_middleLegSize, partner->_middleLegSize, mRate);
+  babyData.LowerLegSize =
+      CalculateTrait(this->_lowerLegSize, partner->_lowerLegSize, mRate);
+
+  // 5. Sabit/Kalıtsal Diğer Veriler
+  babyData.HipLocationAsDegree =
+      this->_hipLocationAsDegree; // Genelde tür bazlı sabit kalır
+  babyData.UpperLegRotationAngle = this->_upperLegRotationAngle;
+  babyData.MiddleLegRotationAngle = this->_middleLegRotationAngle;
+  babyData.LowerLegRotationAngle = this->_lowerLegRotationAngle;
+  babyData.patrolAreaMin = this->_patrolAreaMin;
+  babyData.patrolAreaMax = this->_patrolAreaMax;
+
+  // 6. Doğum Konumu (Annenin yanında)
+  babyData.EntityTransform = this->_spiderNode->transform;
+  babyData.EntityTransform.pos += glm::vec3(glm::linearRand(-1.0f, 1.0f), 0.0f,
+                                            glm::linearRand(-1.0f, 1.0f));
+
+  // Game sınıfına spawn emri ver
+  Game::SpawnNewSpider(babyData);
+
+  // Görsel geri bildirim (Opsiyonel: Doğumda ufak bir poof efekti)
+  ParticleSystem::Instance().EmitPoof(babyData.EntityTransform.pos);
 }

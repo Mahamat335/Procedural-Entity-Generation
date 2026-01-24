@@ -1,6 +1,7 @@
 #ifndef CATERPILLAR_H
 #define CATERPILLAR_H
 
+#include "IReproducible.h"
 #include <EntityData.h>
 #include <IEater.h>
 #include <IEntity.h>
@@ -8,7 +9,7 @@
 #include <SphereCollider.h>
 #include <glm/glm.hpp>
 
-class Caterpillar : public IEntity, public IEater {
+class Caterpillar : public IEntity, public IEater, IReproducible {
 public:
   Caterpillar(CaterpillarEntityData Data);
   ~Caterpillar();
@@ -23,6 +24,7 @@ public:
   void OnCollisionExit(IEntity *other) override;
   void Die() override;
   void SizeUp() override;
+  void Reproduce(IReproducible *partner) override;
   virtual glm::vec3 GetBodyPosition() override {
     return GetNode()->transform.pos;
   }

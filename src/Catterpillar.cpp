@@ -1,3 +1,4 @@
+#include "glm/gtc/random.hpp"
 #include <Caterpillar.h>
 #include <CollisionController.h>
 #include <Game.h>
@@ -153,6 +154,14 @@ void Caterpillar::OnCollisionEnter(IEntity *other) {
     if (Eat(producer->NutiritionValue)) {
       SizeUp();
     }
+  } else if (Caterpillar *otherCaterpillar =
+                 dynamic_cast<Caterpillar *>(other)) {
+    if (IsReadyToPropose(Hunger, MaxHunger, FeedLevel) &&
+        otherCaterpillar->IsReadyToReproduce(otherCaterpillar->Hunger,
+                                             otherCaterpillar->MaxHunger,
+                                             otherCaterpillar->FeedLevel)) {
+      Reproduce(otherCaterpillar);
+    }
   }
 }
 
@@ -173,4 +182,53 @@ void Caterpillar::SizeUp() {
                 glm::vec3(), _bodySize * 0.85f),
       SPHERE, Obsidian);
   _caterpillarNode->AddChild(currentSegment);
+}
+
+void Caterpillar::Reproduce(IReproducible *otherPartner) {
+  Caterpillar *partner = static_cast<Caterpillar *>(otherPartner);
+  float mRate = Game::data.caterpillarGenerationData.MutationRate;
+
+  // 1. Ebeveynlerin durumunu güncelle (Enerji harcat ve seviye düşür)
+  // Üreme sonrası hemen tekrar ürememeleri için Hunger değerini yükseltiyoruz
+  this->Hunger = this->MaxHunger * 0.7f;
+  this->FeedLevel = 1;
+  partner->Hunger = partner->MaxHunger * 0.7f;
+  partner->FeedLevel = 1;
+
+  // 2. Bebek için veri yapısını hazırla
+  CaterpillarEntityData babyData;
+
+  // 3. Genetik Miras + Mutasyon Hesaplamaları
+
+  // Segment Sayısı (Senin kodunda LegPairCount/SegmentCount olarak geçiyor)
+  // Not: Isırgan bacak yerine segment (boğum) sayısı olarak CalculateTrait
+  // kullanıyoruz
+  babyData.SegmentCount = 2; // Minimum boğum sayısı kontrolü
+
+  // Hareket Hızı
+  babyData.MoveSpeed =
+      CalculateTrait(this->_moveSpeed, partner->_moveSpeed, mRate);
+
+  // Vücut Boyutu (glm::vec3)
+  babyData.BodySize =
+      CalculateTrait(this->_bodySize, partner->_bodySize, mRate);
+
+  // Alan Sınırları (Ebeveynlerin devriye gezdiği alanı miras alır)
+  babyData.patrolAreaMin = this->_patrolAreaMin;
+  babyData.patrolAreaMax = this->_patrolAreaMax;
+
+  // 4. Doğum Pozisyonu
+  // Annenin (this) pozisyonunda, hafif bir rastgele sapma ile
+  babyData.EntityTransform = this->_caterpillarNode->transform;
+  babyData.EntityTransform.pos += glm::vec3(glm::linearRand(-0.5f, 0.5f), 0.0f,
+                                            glm::linearRand(-0.5f, 0.5f));
+
+  // 5. Simülasyona ekle
+  Game::SpawnNewCaterpillar(babyData);
+
+  // Görsel geri bildirim
+  ParticleSystem::Instance().EmitPoof(babyData.EntityTransform.pos);
+
+  std::cout << "[Evolution] A new caterpillar hatched with "
+            << babyData.SegmentCount << " segments." << std::endl;
 }

@@ -316,3 +316,35 @@ void Game::DrawHungerBars(const glm::mat4 &view, const glm::mat4 &projection) {
     }
   }
 }
+
+void Game::SpawnNewSpider(SpiderEntityData spiderData) {
+  // 1. Yeni nesneyi oluştur
+  Spider *babySpider = new Spider(spiderData);
+
+  // 2. Sahne hiyerarşisine ekle (spidersParent bir Node'dur)
+  spidersParent.AddChild(babySpider->GetNode());
+
+  // 3. Game listesine ekle
+  spiders.emplace_back(babySpider);
+
+  // 4. Collision sistemine kaydet
+  CollisionController::Instance().AddCollider(babySpider->GetCollider());
+
+  std::cout << "[Ecosystem] A new spider was born with " << spiderData.LegCount
+            << " legs!" << std::endl;
+}
+
+void Game::SpawnNewCaterpillar(CaterpillarEntityData catData) {
+  Caterpillar *baby = new Caterpillar(catData);
+
+  // Hiyerarşiye ekle
+  caterpillarsParent.AddChild(baby->GetNode());
+
+  // Listeye ekle
+  caterpillars.emplace_back(baby);
+
+  // Collision sistemine kaydet (Burası kritik!)
+  CollisionController::Instance().AddCollider(baby->GetCollider());
+
+  std::cout << "[Ecosystem] A new caterpillar hatched!" << std::endl;
+}

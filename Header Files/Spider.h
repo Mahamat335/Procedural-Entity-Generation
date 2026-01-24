@@ -4,11 +4,12 @@
 #include <EntityData.h>
 #include <IEater.h>
 #include <IEntity.h>
+#include <IReproducible.h>
 #include <Node.h>
 #include <SphereCollider.h>
 #include <glm/glm.hpp>
 
-class Spider : public IEntity, public IEater {
+class Spider : public IEntity, public IEater, public IReproducible {
 public:
   Spider(SpiderEntityData Data);
   ~Spider();
@@ -23,6 +24,7 @@ public:
   void OnCollisionExit(IEntity *other) override;
   void Die() override;
   void SizeUp() override;
+  void Reproduce(IReproducible *partner) override;
   virtual glm::vec3 GetBodyPosition() override {
     // SpiderNode'un pozisyonunu dondur
     return GetNode()->transform.pos;

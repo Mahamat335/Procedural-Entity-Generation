@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include "Camera.h"
+#include "EntityData.h"
 #include <Collider.h>
 #include <GLFW/glfw3.h>
 #include <GenerationData.h>
@@ -27,13 +28,13 @@ public:
     unsigned int modelLoc;
     bool areSpidersMoving = true;
     SpiderGenerationData spiderGenerationData{
-        16, 1, 5, 0.2f, 0.8f, 0.25f, 0.25f, 0.25f, 3.0f, 3.0f, 3.0f,
+        16, 1, 5, 0.2f, 0.8f, 0.1f, 0.25f, 0.25f, 0.25f, 3.0f, 3.0f, 3.0f,
     };
     CaterpillarGenerationData caterpillarGenerationData{
-        8, 3, 8, 0.4f, 1.2f,
+        8, 3, 8, 0.4f, 1.2f, 0.1f,
     };
     ProducerGenerationData producerGenerationData{
-        8, 3, 8, 0.4f, 1.2f,
+        8, 3, 8, 0.4f, 1.2f, 0.1f,
     };
   };
 
@@ -52,6 +53,8 @@ public:
   void InitializeSpiders();
   void InitializeCaterpillars();
   void InitializeProducers();
+  static void SpawnNewSpider(SpiderEntityData spiderData);
+  static void SpawnNewCaterpillar(CaterpillarEntityData caterpillarData);
 
 private:
   void DrawHungerBars(const glm::mat4 &view, const glm::mat4 &projection);

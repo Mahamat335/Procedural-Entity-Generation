@@ -1,25 +1,19 @@
 #ifndef GENERATION_DATA_H
 #define GENERATION_DATA_H
 
-struct EntityGenerationData
-{
+struct EntityGenerationData {
 public:
-    int EntityCount, LegPairCountMin, LegPairCountMax;
-    float MoveSpeedMin, MoveSpeedMax;
+  int EntityCount, LegPairCountMin, LegPairCountMax;
+  float MoveSpeedMin, MoveSpeedMax, MutationRate;
 };
 
-struct SpiderGenerationData : public EntityGenerationData
-{
+struct SpiderGenerationData : public EntityGenerationData {
 public:
-    float UpperLegSizeScaleMin, MiddleLegSizeScaleMin, LowerLegSizeScaleMin,
-        UpperLegSizeScaleMax, MiddleLegSizeScaleMax, LowerLegSizeScaleMax;
+  float UpperLegSizeScaleMin, MiddleLegSizeScaleMin, LowerLegSizeScaleMin,
+      UpperLegSizeScaleMax, MiddleLegSizeScaleMax, LowerLegSizeScaleMax;
 };
 
-struct CaterpillarGenerationData : public EntityGenerationData
-{
-};
+struct CaterpillarGenerationData : public EntityGenerationData {};
 
-struct ProducerGenerationData : public EntityGenerationData
-{
-};
+struct ProducerGenerationData : public EntityGenerationData {};
 #endif
