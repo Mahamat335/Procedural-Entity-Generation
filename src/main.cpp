@@ -299,9 +299,13 @@ void processInput(GLFWwindow *window) {
   if (glfwGetKey(window, GLFW_KEY_SLASH) == GLFW_PRESS)
     camera.SetSpeed();
 
-  if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS) {
+  static bool middleMouseWasPressed = false;
+  bool middleMouseIsPressed =
+      glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
+  if (middleMouseIsPressed && !middleMouseWasPressed) {
     ChangeCursorStatus(window);
   }
+  middleMouseWasPressed = middleMouseIsPressed;
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback
